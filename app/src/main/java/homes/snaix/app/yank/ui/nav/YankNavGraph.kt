@@ -8,6 +8,7 @@ import androidx.compose.ui.Modifier
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import homes.snaix.app.yank.ui.notes.NotesScreen
 import homes.snaix.app.yank.ui.records.RecordsScreen
 
 @Composable
@@ -16,7 +17,7 @@ fun YankNavGraph() {
     Scaffold(bottomBar = { BottomNav(nav) }) { padding ->
         NavHost(nav, startDestination = TopDest.Records.route, modifier = Modifier.padding(padding)) {
             composable(TopDest.Records.route)   { RecordsScreen() }
-            composable(TopDest.Notes.route)     { Text("Notes — Phase 14") }
+            composable(TopDest.Notes.route)     { NotesScreen() }
             composable(TopDest.Reminders.route) { Text("Reminders — Phase 15") }
             composable(TopDest.Settings.route)  { Text("Settings — Phase 16") }
         }
