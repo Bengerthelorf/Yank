@@ -3,7 +3,6 @@ package homes.snaix.app.yank.domain.vlm
 import homes.snaix.app.yank.domain.schema.Recognition
 import homes.snaix.app.yank.domain.schema.RecognitionParser
 import io.ktor.client.HttpClient
-import io.ktor.client.call.body
 import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
 import io.ktor.client.plugins.logging.LogLevel
@@ -17,11 +16,14 @@ import io.ktor.http.ContentType
 import io.ktor.http.contentType
 import io.ktor.http.isSuccess
 import io.ktor.serialization.kotlinx.json.json
+import kotlinx.coroutines.CancellationException
 import kotlinx.serialization.json.Json
 import java.io.IOException
 import java.net.UnknownHostException
 import java.util.Base64
 import kotlin.time.Duration.Companion.seconds
+
+private val ResponseJson = Json { ignoreUnknownKeys = true }
 
 class VlmException(val error: VlmError) : RuntimeException(error.toString())
 
@@ -67,6 +69,8 @@ class VlmClient(
         } catch (e: IOException) {
             val err = if (e is UnknownHostException) VlmError.NoNetwork else VlmError.Timeout
             return Result.failure(VlmException(err))
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
             return Result.failure(VlmException(VlmError.Http(-1, e.message)))
         }
@@ -76,10 +80,13 @@ class VlmClient(
             return Result.failure(VlmException(VlmError.Http(resp.status.value, body)))
         }
 
+        val rawBody = resp.bodyAsText()
         val parsed: ChatResponse = try {
-            resp.body()
+            ResponseJson.decodeFromString(rawBody)
+        } catch (e: CancellationException) {
+            throw e
         } catch (e: Exception) {
-            return Result.failure(VlmException(VlmError.Parse(resp.bodyAsText(), e)))
+            return Result.failure(VlmException(VlmError.Parse(rawBody, e)))
         }
 
         val content = parsed.choices.firstOrNull()?.message?.content
