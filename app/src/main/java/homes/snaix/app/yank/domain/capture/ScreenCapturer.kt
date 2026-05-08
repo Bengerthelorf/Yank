@@ -12,6 +12,7 @@ import android.os.Handler
 import android.os.HandlerThread
 import android.util.DisplayMetrics
 import android.view.WindowManager
+import java.util.concurrent.atomic.AtomicBoolean
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 import kotlinx.coroutines.suspendCancellableCoroutine
@@ -22,13 +23,16 @@ class ScreenCapturer(private val context: Context) {
         val (width, height) = screenSize()
         val density = context.resources.displayMetrics.densityDpi
 
-        val handlerThread = HandlerThread("ScreenCapturer").also { it.start() }
+        val handlerThread = HandlerThread("ScreenCapturer-${System.nanoTime()}").also { it.start() }
         val handler = Handler(handlerThread.looper)
 
         val reader = ImageReader.newInstance(width, height, PixelFormat.RGBA_8888, 2)
         var virtualDisplay: VirtualDisplay? = null
+        val cleaned = AtomicBoolean(false)
 
+        // Idempotent. Concurrent listener-fire and coroutine-cancellation can both call this.
         fun cleanup() {
+            if (!cleaned.compareAndSet(false, true)) return
             try { virtualDisplay?.release() } catch (_: Exception) {}
             try { reader.close() } catch (_: Exception) {}
             handlerThread.quitSafely()
@@ -37,23 +41,27 @@ class ScreenCapturer(private val context: Context) {
         reader.setOnImageAvailableListener({ r ->
             val img = r.acquireLatestImage() ?: return@setOnImageAvailableListener
             try {
-                val plane = img.planes[0]
-                val rowStride = plane.rowStride
-                val pixelStride = plane.pixelStride
-                val rowPadding = rowStride - pixelStride * width
-                val bitmap = Bitmap.createBitmap(
-                    width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888
-                )
-                bitmap.copyPixelsFromBuffer(plane.buffer)
-                val cropped = if (rowPadding == 0) bitmap
-                else Bitmap.createBitmap(bitmap, 0, 0, width, height).also { bitmap.recycle() }
+                // Build the bitmap with image still open; close image FIRST so its buffer slot
+                // is returned before we tear down the ImageReader in cleanup().
+                val cropped: Bitmap = try {
+                    val plane = img.planes[0]
+                    val rowStride = plane.rowStride
+                    val pixelStride = plane.pixelStride
+                    val rowPadding = rowStride - pixelStride * width
+                    val bitmap = Bitmap.createBitmap(
+                        width + rowPadding / pixelStride, height, Bitmap.Config.ARGB_8888
+                    )
+                    bitmap.copyPixelsFromBuffer(plane.buffer)
+                    if (rowPadding == 0) bitmap
+                    else Bitmap.createBitmap(bitmap, 0, 0, width, height).also { bitmap.recycle() }
+                } finally {
+                    img.close()
+                }
                 cleanup()
                 cont.resume(cropped)
             } catch (e: Exception) {
                 cleanup()
                 cont.resumeWithException(e)
-            } finally {
-                img.close()
             }
         }, handler)
 

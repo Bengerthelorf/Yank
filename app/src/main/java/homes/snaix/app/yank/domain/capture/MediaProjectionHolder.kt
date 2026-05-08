@@ -9,6 +9,9 @@ object MediaProjectionHolder {
         private set
 
     fun set(manager: MediaProjectionManager, resultCode: Int, data: Intent) {
+        // Stop any prior projection so its system resources (virtual display token,
+        // display server binder) are released; otherwise calling set() twice leaks.
+        projection?.stop()
         projection = manager.getMediaProjection(resultCode, data)
         projection?.registerCallback(object : MediaProjection.Callback() {
             override fun onStop() { projection = null }
