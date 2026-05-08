@@ -8,6 +8,7 @@ import homes.snaix.app.yank.data.prefs.EncryptedKeyStore
 import homes.snaix.app.yank.data.repo.ConfigRepository
 import homes.snaix.app.yank.data.repo.HistoryRepository
 import homes.snaix.app.yank.domain.capture.CapturePipeline
+import homes.snaix.app.yank.domain.capture.ImagePickPipeline
 import homes.snaix.app.yank.domain.routing.PinPublisher
 import homes.snaix.app.yank.domain.routing.PinScheduler
 import homes.snaix.app.yank.domain.routing.Router
@@ -52,6 +53,8 @@ class AppContainer(private val ctx: Context) {
     val capturePipeline: CapturePipeline by lazy {
         CapturePipeline(ctx, zxing, vlmClient, router, configRepo)
     }
+
+    val imagePickPipeline by lazy { ImagePickPipeline(ctx, capturePipeline) }
 
     private val _outcomes = MutableSharedFlow<homes.snaix.app.yank.domain.capture.PipelineOutcome>(
         replay = 0, extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST
