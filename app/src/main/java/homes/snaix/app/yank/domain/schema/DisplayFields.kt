@@ -25,7 +25,7 @@ fun Recognition.displaySecondary(): String? = when (this) {
         TicketSubType.TRAIN -> "${fromStation.orEmpty()} → ${toStation.orEmpty()}".takeIf { fromStation != null || toStation != null }
         TicketSubType.FLIGHT -> "${departureAirport.orEmpty()} → ${arrivalAirport.orEmpty()}".takeIf { departureAirport != null || arrivalAirport != null }
         TicketSubType.MOVIE -> store
-        TicketSubType.GENERIC -> "$date $time".trim()
+        TicketSubType.GENERIC -> listOfNotNull(date, time).joinToString(" ").ifEmpty { null }
     }
     is Recognition.Todo -> "$date $time"
     is Recognition.Note -> date?.let { "$it ${time.orEmpty()}".trim() }

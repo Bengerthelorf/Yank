@@ -37,7 +37,7 @@ class RecognitionSerializationTest {
         assertThat(r.number).isEqualTo("summary")
     }
 
-    @Test fun `decodes 排队 卷码 快递`() {
+    @Test fun `decodes 排队 券码 快递`() {
         val q = json.decodeFromString<Recognition>("""{"type":"排队","number":"A01"}""")
         val v = json.decodeFromString<Recognition>("""{"type":"券码","number":"周末早茶"}""")
         val e = json.decodeFromString<Recognition>("""{"type":"快递","number":"1-2-3456"}""")
