@@ -6,7 +6,7 @@ import kotlinx.serialization.json.Json
 import org.junit.Test
 
 class RecognitionSerializationTest {
-    private val json = Json { ignoreUnknownKeys = true; classDiscriminator = "type" }
+    private val json = Json { ignoreUnknownKeys = true }
 
     @Test fun `parses 取餐 object`() {
         val raw = """{"type":"取餐","number":"A123","brand":"瑞幸","store":"街道口店","product":"生椰拿铁","price":"15"}"""

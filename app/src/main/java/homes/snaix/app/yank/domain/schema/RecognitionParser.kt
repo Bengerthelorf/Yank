@@ -6,7 +6,6 @@ import kotlinx.serialization.json.Json
 class RecognitionParser(
     private val json: Json = Json {
         ignoreUnknownKeys = true
-        classDiscriminator = "type"
     }
 ) {
     fun parse(raw: String): Result<List<Recognition>> = runCatching {
