@@ -1,0 +1,30 @@
+# Internal-only design / planning notes
+dev_docs/
+
+# macOS
+.DS_Store
+
+# Android Studio / IntelliJ
+.idea/
+*.iml
+.gradle/
+local.properties
+captures/
+.cxx/
+
+# Build outputs
+/build/
+*/build/
+/app/release/
+*.apk
+*.aab
+
+# Logs / dumps
+*.log
+*.hprof
+
+# Keys / secrets (never commit)
+*.jks
+*.keystore
+*.pem
+google-services.json
