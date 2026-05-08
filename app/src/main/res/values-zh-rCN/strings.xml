@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Yank</string>
+    <string name="app_name">上岛记</string>
     <string name="qs_tile_label">上岛识别</string>
     <string name="shortcut_capture_short">识别</string>
     <string name="shortcut_capture_long">上岛识别</string>
