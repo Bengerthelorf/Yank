@@ -26,20 +26,17 @@ data class TypeColors(
     val express: TypeColorRole,
     val ticket: TypeColorRole,
     val todo: TypeColorRole,
-    val notesContainer: Color,
-    val onNotesContainer: Color,
+    val notes: TypeColorRole,
 )
 
 val LocalTypeColors = compositionLocalOf<TypeColors> { error("TypeColors not provided") }
 
-private val TypeHues = mapOf(
-    "queue" to 200.0,
-    "pickup" to 140.0,
-    "voucher" to 340.0,
-    "express" to 240.0,
-    "ticket" to 290.0,
-    "todo" to 50.0,
-)
+private const val QueueHue = 200.0
+private const val PickupHue = 140.0
+private const val VoucherHue = 340.0
+private const val ExpressHue = 240.0
+private const val TicketHue = 290.0
+private const val TodoHue = 50.0
 
 @Composable
 fun rememberTypeColorsFor(scheme: ColorScheme, isDark: Boolean): TypeColors = remember(scheme, isDark) {
@@ -59,13 +56,17 @@ fun rememberTypeColorsFor(scheme: ColorScheme, isDark: Boolean): TypeColors = re
         )
     }
     TypeColors(
-        queue = roleFor(TypeHues.getValue("queue")),
-        pickup = roleFor(TypeHues.getValue("pickup")),
-        voucher = roleFor(TypeHues.getValue("voucher")),
-        express = roleFor(TypeHues.getValue("express")),
-        ticket = roleFor(TypeHues.getValue("ticket")),
-        todo = roleFor(TypeHues.getValue("todo")),
-        notesContainer = scheme.surfaceVariant,
-        onNotesContainer = scheme.onSurfaceVariant,
+        queue = roleFor(QueueHue),
+        pickup = roleFor(PickupHue),
+        voucher = roleFor(VoucherHue),
+        express = roleFor(ExpressHue),
+        ticket = roleFor(TicketHue),
+        todo = roleFor(TodoHue),
+        notes = TypeColorRole(
+            color = scheme.onSurfaceVariant,
+            onColor = scheme.surfaceVariant,
+            container = scheme.surfaceVariant,
+            onContainer = scheme.onSurfaceVariant,
+        ),
     )
 }
