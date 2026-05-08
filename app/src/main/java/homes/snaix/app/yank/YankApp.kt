@@ -1,10 +1,13 @@
 package homes.snaix.app.yank
 
 import android.app.Application
+import android.app.NotificationChannel
+import android.app.NotificationManager
 import android.content.Intent
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import homes.snaix.app.yank.domain.pin.ChannelIds
 import homes.snaix.app.yank.trigger.CaptureActivity
 
 class YankApp : Application() {
@@ -14,7 +17,21 @@ class YankApp : Application() {
     override fun onCreate() {
         super.onCreate()
         di = AppContainer(this)
+        ensureChannels()
         registerCaptureShortcut()
+    }
+
+    private fun ensureChannels() {
+        val nm = getSystemService(NotificationManager::class.java) ?: return
+        nm.createNotificationChannel(NotificationChannel(
+            ChannelIds.SERVICE, "Yank Service", NotificationManager.IMPORTANCE_LOW
+        ).apply { description = "FG service" })
+        nm.createNotificationChannel(NotificationChannel(
+            ChannelIds.PIN, "钉住的信息", NotificationManager.IMPORTANCE_HIGH
+        ).apply { description = "识别后的常驻通知" })
+        nm.createNotificationChannel(NotificationChannel(
+            ChannelIds.ERROR, "错误", NotificationManager.IMPORTANCE_DEFAULT
+        ).apply { description = "解析失败 / 网络错误" })
     }
 
     private fun registerCaptureShortcut() {
