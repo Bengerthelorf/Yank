@@ -7,8 +7,13 @@ import android.content.Intent
 import androidx.core.content.pm.ShortcutInfoCompat
 import androidx.core.content.pm.ShortcutManagerCompat
 import androidx.core.graphics.drawable.IconCompat
+import androidx.work.ExistingPeriodicWorkPolicy
+import androidx.work.PeriodicWorkRequestBuilder
+import androidx.work.WorkManager
 import homes.snaix.app.yank.domain.pin.ChannelIds
+import homes.snaix.app.yank.domain.pin.HistoryRetentionWorker
 import homes.snaix.app.yank.trigger.CaptureActivity
+import java.util.concurrent.TimeUnit
 
 class YankApp : Application() {
     lateinit var di: AppContainer
@@ -18,6 +23,7 @@ class YankApp : Application() {
         super.onCreate()
         di = AppContainer(this)
         ensureChannels()
+        scheduleRetention()
         registerCaptureShortcut()
     }
 
@@ -32,6 +38,13 @@ class YankApp : Application() {
         nm.createNotificationChannel(NotificationChannel(
             ChannelIds.ERROR, "错误", NotificationManager.IMPORTANCE_DEFAULT
         ).apply { description = "解析失败 / 网络错误" })
+    }
+
+    private fun scheduleRetention() {
+        val req = PeriodicWorkRequestBuilder<HistoryRetentionWorker>(1, TimeUnit.DAYS).build()
+        WorkManager.getInstance(this).enqueueUniquePeriodicWork(
+            "yank_retention", ExistingPeriodicWorkPolicy.KEEP, req
+        )
     }
 
     private fun registerCaptureShortcut() {

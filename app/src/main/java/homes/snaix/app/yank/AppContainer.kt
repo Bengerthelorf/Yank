@@ -9,6 +9,8 @@ import homes.snaix.app.yank.data.repo.ConfigRepository
 import homes.snaix.app.yank.data.repo.HistoryRepository
 import homes.snaix.app.yank.domain.capture.CapturePipeline
 import homes.snaix.app.yank.domain.capture.ImagePickPipeline
+import homes.snaix.app.yank.domain.pin.NotificationPinPublisher
+import homes.snaix.app.yank.domain.pin.WorkPinScheduler
 import homes.snaix.app.yank.domain.routing.PinPublisher
 import homes.snaix.app.yank.domain.routing.PinScheduler
 import homes.snaix.app.yank.domain.routing.Router
@@ -33,9 +35,8 @@ class AppContainer(private val ctx: Context) {
     val zxing by lazy { ZxingDecoder() }
     val vlmClient by lazy { VlmClient() }
 
-    // Phase 11 will replace these with real implementations.
-    var pinPublisher: PinPublisher = NoopPublisher()
-    var pinScheduler: PinScheduler = NoopScheduler()
+    val pinPublisher: PinPublisher by lazy { NotificationPinPublisher(ctx) }
+    val pinScheduler: PinScheduler by lazy { WorkPinScheduler(ctx) }
 
     private var notificationCounter: Int = 2000
     val nextNotificationId: () -> Int = { ++notificationCounter }
@@ -61,14 +62,4 @@ class AppContainer(private val ctx: Context) {
     )
     val captureOutcomeBus: MutableSharedFlow<homes.snaix.app.yank.domain.capture.PipelineOutcome> = _outcomes
     val captureOutcomes: SharedFlow<homes.snaix.app.yank.domain.capture.PipelineOutcome> = _outcomes.asSharedFlow()
-}
-
-private class NoopPublisher : PinPublisher {
-    override suspend fun publish(history: homes.snaix.app.yank.data.db.HistoryEntity, notificationId: Int, recognition: homes.snaix.app.yank.domain.schema.Recognition, payload: String?) = Unit
-    override suspend fun cancel(notificationId: Int) = Unit
-}
-private class NoopScheduler : PinScheduler {
-    override suspend fun scheduleArchive(historyId: String, archiveAt: Long, notificationId: Int) = Unit
-    override suspend fun scheduleTodoPin(historyId: String, pinTime: Long, notificationId: Int) = Unit
-    override suspend fun cancelTodo(historyId: String) = Unit
 }
