@@ -70,7 +70,10 @@ class Router(
             createdAt = tNow,
             eventTime = eventTimeMs,
             archiveAt = archiveAtMs,
-            archived = (r is Recognition.Todo && eventTimeMs != null && eventTimeMs < tNow),
+            // A Todo whose date/time can't be parsed is treated as already-archived: we
+            // never publish a Pin for an unscheduleable item, but we keep the row so the
+            // user can see the model's output and re-capture.
+            archived = (r is Recognition.Todo && (eventTimeMs == null || eventTimeMs < tNow)),
             source = source,
         )
         repo.upsert(entity)
