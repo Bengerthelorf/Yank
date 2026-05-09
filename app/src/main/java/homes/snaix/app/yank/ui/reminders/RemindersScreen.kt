@@ -13,9 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,12 +22,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
-import homes.snaix.app.yank.data.db.HistoryEntity
-import homes.snaix.app.yank.ui.common.ActionMenuSheet
-import homes.snaix.app.yank.ui.common.ActionMenus
 import homes.snaix.app.yank.ui.common.EmptyState
 import homes.snaix.app.yank.ui.common.SwipeToDeleteBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
+import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 import homes.snaix.app.yank.ui.records.TypeCard
 
@@ -42,7 +37,11 @@ fun RemindersScreen() {
     })
     val state by vm.state.collectAsState()
     val copy = rememberCopyEntity()
-    var menuTarget by remember { mutableStateOf<HistoryEntity?>(null) }
+    val menu = rememberRecordActionMenu(
+        onCopy = copy,
+        onArchive = { vm.archive(it.id) },
+        onDelete = { vm.delete(it.id) },
+    )
 
     if (state.active.isEmpty() && state.upcoming.isEmpty()) {
         EmptyState(
@@ -65,7 +64,7 @@ fun RemindersScreen() {
                         TypeCard(
                             entity = e,
                             onClick = { copy(e) },
-                            onLongClick = { menuTarget = e },
+                            onLongClick = { menu.openMenu(e) },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                         )
                     }
@@ -84,7 +83,7 @@ fun RemindersScreen() {
                         TypeCard(
                             entity = e,
                             onClick = { copy(e) },
-                            onLongClick = { menuTarget = e },
+                            onLongClick = { menu.openMenu(e) },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                         )
                     }
@@ -94,16 +93,5 @@ fun RemindersScreen() {
         }
     }
 
-    menuTarget?.let { entity ->
-        val close = { menuTarget = null }
-        ActionMenuSheet(
-            title = entity.displayPrimary,
-            items = ActionMenus.copyArchiveDelete(
-                onCopy = { copy(entity); close() },
-                onArchive = { vm.archive(entity.id); close() },
-                onDelete = { vm.delete(entity.id); close() },
-            ),
-            onDismiss = close,
-        )
-    }
+    menu.Host()
 }

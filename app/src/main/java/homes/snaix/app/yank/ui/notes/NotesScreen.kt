@@ -18,9 +18,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -31,11 +28,10 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.data.db.HistoryEntity
-import homes.snaix.app.yank.ui.common.ActionMenuSheet
-import homes.snaix.app.yank.ui.common.ActionMenus
 import homes.snaix.app.yank.ui.common.EmptyState
 import homes.snaix.app.yank.ui.common.SwipeToDeleteBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
+import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 
 @Composable
@@ -46,7 +42,11 @@ fun NotesScreen() {
     })
     val items by vm.items.collectAsState()
     val copy = rememberCopyEntity()
-    var menuTarget by remember { mutableStateOf<HistoryEntity?>(null) }
+    val menu = rememberRecordActionMenu(
+        onCopy = copy,
+        onDelete = { vm.delete(it.id) },
+        // notes never archive — they live on a separate screen with no archive view
+    )
 
     if (items.isEmpty()) {
         EmptyState(
@@ -61,7 +61,7 @@ fun NotesScreen() {
                     NoteCard(
                         entity = e,
                         onClick = { copy(e) },
-                        onLongClick = { menuTarget = e },
+                        onLongClick = { menu.openMenu(e) },
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     )
                 }
@@ -70,17 +70,7 @@ fun NotesScreen() {
         }
     }
 
-    menuTarget?.let { entity ->
-        val close = { menuTarget = null }
-        ActionMenuSheet(
-            title = entity.displayPrimary,
-            items = ActionMenus.copyDelete(
-                onCopy = { copy(entity); close() },
-                onDelete = { vm.delete(entity.id); close() },
-            ),
-            onDismiss = close,
-        )
-    }
+    menu.Host()
 }
 
 @Composable
@@ -90,13 +80,18 @@ private fun NoteCard(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
+    // combinedClickable lives INSIDE the Card so the hit region matches the
+    // visual card bounds, not the outer padding the caller adds for layout.
     Card(
         shape = RoundedCornerShape(20.dp),
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        modifier = modifier.fillMaxWidth(),
     ) {
-        Column(Modifier.padding(16.dp)) {
+        Column(
+            Modifier
+                .fillMaxWidth()
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                .padding(16.dp)
+        ) {
             Text(entity.displayPrimary, style = MaterialTheme.typography.titleMedium)
             Text(
                 entity.displaySecondary.orEmpty(),

@@ -37,16 +37,19 @@ fun TypeCard(
         else                 -> entity.type
     }
     Card(
-        // combinedClickable on the modifier gives us a long-press gesture that
-        // Card(onClick = ...) can't express. Card's own onClick is intentionally
-        // left unset.
-        modifier = modifier
-            .fillMaxWidth()
-            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
+        modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = role.container),
     ) {
-        Column(modifier = Modifier.padding(16.dp)) {
+        // combinedClickable lives INSIDE the Card so the hit region matches the
+        // visual card bounds; otherwise the outer padding the caller passes
+        // (e.g., 16dp horizontal between cards) becomes tappable too.
+        Column(
+            modifier = Modifier
+                .fillMaxWidth()
+                .combinedClickable(onClick = onClick, onLongClick = onLongClick)
+                .padding(16.dp),
+        ) {
             Text(
                 "$typeLabel · ${entity.displaySecondary.orEmpty()}",
                 style = MaterialTheme.typography.labelLarge,
