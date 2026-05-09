@@ -87,6 +87,12 @@
     <string name="recognize_in_flight">Recognizing…</string>
     <string name="recognize_saved">Saved to records</string>
 
+    <!-- Card action menu (long-press) -->
+    <string name="action_copy">Copy primary text</string>
+    <string name="action_archive">Archive</string>
+    <string name="action_delete">Delete</string>
+    <string name="action_menu_title">Quick actions</string>
+
     <!-- Records empty states -->
     <string name="empty_filter_title">No records for this filter</string>
     <string name="empty_filter_subtitle">Tap the active chip again to clear it, or pick a different one.</string>

@@ -14,6 +14,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 /**
  * Sealed model of the visible record filter on the Records screen.
@@ -74,4 +75,6 @@ class RecordsViewModel(
 
     fun setFilter(f: RecordFilter) { _filter.value = f }
     fun setQuery(q: String?) { _query.value = q?.takeIf { it.isNotBlank() } }
+    fun delete(id: String) = viewModelScope.launch { repo.delete(id) }
+    fun archive(id: String) = viewModelScope.launch { repo.setArchived(id) }
 }

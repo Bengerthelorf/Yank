@@ -1,5 +1,6 @@
 package homes.snaix.app.yank.ui.records
 
+import androidx.compose.foundation.combinedClickable
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
@@ -25,6 +26,7 @@ fun TypeCard(
     entity: HistoryEntity,
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
+    onLongClick: (() -> Unit)? = null,
 ) {
     val typeColors = LocalTypeColors.current
     val knownType = remember(entity.type) { RecordType.fromDiscriminator(entity.type) }
@@ -35,10 +37,14 @@ fun TypeCard(
         else                 -> entity.type
     }
     Card(
-        modifier = modifier.fillMaxWidth(),
+        // combinedClickable on the modifier gives us a long-press gesture that
+        // Card(onClick = ...) can't express. Card's own onClick is intentionally
+        // left unset.
+        modifier = modifier
+            .fillMaxWidth()
+            .combinedClickable(onClick = onClick, onLongClick = onLongClick),
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = role.container),
-        onClick = onClick,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
             Text(

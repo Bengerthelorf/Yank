@@ -8,13 +8,16 @@ import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 
 data class RemindersUiState(
     val active: List<HistoryEntity>,
     val upcoming: List<HistoryEntity>,
 )
 
-class RemindersViewModel(repo: HistoryRepository) : ViewModel() {
+class RemindersViewModel(
+    private val repo: HistoryRepository,
+) : ViewModel() {
     val state: StateFlow<RemindersUiState> = repo.observeUpcoming(0L)
         .map { all ->
             val now = System.currentTimeMillis()
@@ -23,4 +26,7 @@ class RemindersViewModel(repo: HistoryRepository) : ViewModel() {
             RemindersUiState(active, upcoming)
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, RemindersUiState(emptyList(), emptyList()))
+
+    fun delete(id: String) = viewModelScope.launch { repo.delete(id) }
+    fun archive(id: String) = viewModelScope.launch { repo.setArchived(id) }
 }

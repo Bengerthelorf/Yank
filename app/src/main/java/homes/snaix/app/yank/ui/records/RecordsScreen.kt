@@ -13,6 +13,9 @@ import androidx.compose.material.icons.outlined.History
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -22,7 +25,11 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
+import homes.snaix.app.yank.data.db.HistoryEntity
+import homes.snaix.app.yank.ui.common.ActionMenuSheet
+import homes.snaix.app.yank.ui.common.ActionMenus
 import homes.snaix.app.yank.ui.common.EmptyState
+import homes.snaix.app.yank.ui.common.SwipeToDeleteBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 
@@ -36,9 +43,9 @@ fun RecordsScreen() {
     val filter by vm.filter.collectAsState()
     val hasAnyData by vm.hasAnyData.collectAsState()
     val copy = rememberCopyEntity()
+    var menuTarget by remember { mutableStateOf<HistoryEntity?>(null) }
 
     if (!hasAnyData) {
-        // No record has ever been written — chips would be a dead-end, so suppress them.
         EmptyState(
             icon = Icons.Outlined.History,
             title = stringResource(R.string.empty_records_title),
@@ -48,14 +55,9 @@ fun RecordsScreen() {
     }
 
     Column(modifier = Modifier.fillMaxSize()) {
-        FilterChipsRow(
-            selected = filter,
-            onSelected = vm::setFilter,
-        )
+        FilterChipsRow(selected = filter, onSelected = vm::setFilter)
         Spacer(Modifier.height(12.dp))
         if (items.isEmpty()) {
-            // We have data, just none for the current filter — keep chips visible
-            // (they're rendered above) so the user can clear or switch.
             EmptyState(
                 icon = Icons.Outlined.FilterAltOff,
                 title = stringResource(R.string.empty_filter_title),
@@ -64,14 +66,30 @@ fun RecordsScreen() {
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(items, key = { it.id }) { entity ->
-                    TypeCard(
-                        entity = entity,
-                        onClick = { copy(entity) },
-                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                    )
+                    SwipeToDeleteBox(onDelete = { vm.delete(entity.id) }) {
+                        TypeCard(
+                            entity = entity,
+                            onClick = { copy(entity) },
+                            onLongClick = { menuTarget = entity },
+                            modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                        )
+                    }
                 }
                 item { Spacer(Modifier.height(BottomNavReservedHeight)) }
             }
         }
+    }
+
+    menuTarget?.let { entity ->
+        val close = { menuTarget = null }
+        ActionMenuSheet(
+            title = entity.displayPrimary,
+            items = ActionMenus.copyArchiveDelete(
+                onCopy = { copy(entity); close() },
+                onArchive = { vm.archive(entity.id); close() },
+                onDelete = { vm.delete(entity.id); close() },
+            ),
+            onDismiss = close,
+        )
     }
 }
