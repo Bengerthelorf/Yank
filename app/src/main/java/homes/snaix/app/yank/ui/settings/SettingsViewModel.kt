@@ -4,6 +4,7 @@ import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import homes.snaix.app.yank.data.repo.ConfigRepository
+import homes.snaix.app.yank.domain.schema.type
 import homes.snaix.app.yank.domain.vlm.VlmClient
 import homes.snaix.app.yank.domain.vlm.VlmConfig
 import homes.snaix.app.yank.domain.vlm.VlmException

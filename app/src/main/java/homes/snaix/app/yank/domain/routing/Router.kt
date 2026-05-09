@@ -10,6 +10,7 @@ import homes.snaix.app.yank.domain.schema.TicketSubType
 import homes.snaix.app.yank.domain.schema.displayPrimary
 import homes.snaix.app.yank.domain.schema.displaySecondary
 import homes.snaix.app.yank.domain.schema.subType
+import homes.snaix.app.yank.domain.schema.type
 import homes.snaix.app.yank.domain.time.EventClock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json

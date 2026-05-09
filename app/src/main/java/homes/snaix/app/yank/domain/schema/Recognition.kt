@@ -1,4 +1,3 @@
-// app/src/main/java/homes/snaix/app/yank/domain/schema/Recognition.kt
 package homes.snaix.app.yank.domain.schema
 
 import kotlinx.serialization.Serializable
@@ -9,7 +8,6 @@ import kotlinx.serialization.json.JsonClassDiscriminator
 @Serializable
 @JsonClassDiscriminator("type")
 sealed class Recognition {
-    abstract val type: String
 
     @Serializable @SerialName("排队")
     data class Queue(
@@ -17,7 +15,7 @@ sealed class Recognition {
         val store: String? = null,
         val brand: String? = null,
         val price: String? = null,
-    ) : Recognition() { override val type = "排队" }
+    ) : Recognition()
 
     @Serializable @SerialName("取餐")
     data class Pickup(
@@ -26,14 +24,14 @@ sealed class Recognition {
         val brand: String? = null,
         val product: String? = null,
         val price: String? = null,
-    ) : Recognition() { override val type = "取餐" }
+    ) : Recognition()
 
     @Serializable @SerialName("券码")
     data class Voucher(
         val number: String? = null,
         val store: String? = null,
         val price: String? = null,
-    ) : Recognition() { override val type = "券码" }
+    ) : Recognition()
 
     @Serializable @SerialName("快递")
     data class Express(
@@ -43,7 +41,7 @@ sealed class Recognition {
         val station: String? = null,
         val tracking: String? = null,
         val remark: String? = null,
-    ) : Recognition() { override val type = "快递" }
+    ) : Recognition()
 
     @Serializable @SerialName("票券")
     data class Ticket(
@@ -75,7 +73,7 @@ sealed class Recognition {
         // shared
         val gate: String? = null,
         val price: String? = null,
-    ) : Recognition() { override val type = "票券" }
+    ) : Recognition()
 
     @Serializable @SerialName("待办")
     data class Todo(
@@ -85,7 +83,7 @@ sealed class Recognition {
         val pinLeadMinutes: Int = 60,
         val location: String? = null,
         val remark: String? = null,
-    ) : Recognition() { override val type = "待办" }
+    ) : Recognition()
 
     @Serializable @SerialName("notes")
     data class Note(
@@ -93,5 +91,21 @@ sealed class Recognition {
         val number: String? = null,
         val date: String? = null,
         val time: String? = null,
-    ) : Recognition() { override val type = "notes" }
+    ) : Recognition()
 }
+
+/**
+ * The discriminator string for this Recognition. Computed from the class
+ * (not stored as a property) so it doesn't conflict with kotlinx.serialization's
+ * @JsonClassDiscriminator("type") when encoding.
+ */
+val Recognition.type: String
+    get() = when (this) {
+        is Recognition.Queue   -> "排队"
+        is Recognition.Pickup  -> "取餐"
+        is Recognition.Voucher -> "券码"
+        is Recognition.Express -> "快递"
+        is Recognition.Ticket  -> "票券"
+        is Recognition.Todo    -> "待办"
+        is Recognition.Note    -> "notes"
+    }
