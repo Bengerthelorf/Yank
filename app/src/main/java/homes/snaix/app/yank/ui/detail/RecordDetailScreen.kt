@@ -18,6 +18,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.History
 import androidx.compose.material3.AssistChip
 import androidx.compose.material3.AssistChipDefaults
 import androidx.compose.material3.ButtonDefaults
@@ -27,6 +28,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.ui.Alignment
@@ -39,15 +41,14 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.data.db.HistoryEntity
+import homes.snaix.app.yank.ui.common.EmptyState
+import homes.snaix.app.yank.ui.common.ScreenshotImage
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
 import homes.snaix.app.yank.ui.records.RecordType
 import homes.snaix.app.yank.ui.theme.LocalTypeColors
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -61,26 +62,23 @@ fun RecordDetailScreen(
     val vm: RecordDetailViewModel = viewModel(factory = viewModelFactory {
         initializer { RecordDetailViewModel(app.di.historyRepo, entityId) }
     })
-    val entity by vm.entity.collectAsState()
+    val state by vm.state.collectAsState()
     val copy = rememberCopyEntity()
 
-    val e = entity ?: return
-    Box(modifier = Modifier.fillMaxSize()) {
-        LazyColumn(
-            modifier = Modifier.fillMaxSize(),
-            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 96.dp),
-            verticalArrangement = Arrangement.spacedBy(16.dp),
-        ) {
-            item { TypeChipRow(e) }
-            item { PrimaryBlock(e) }
-            e.screenshotPath?.let { path ->
-                item { ScreenshotBlock(path) }
-            }
-            item { CreatedAtRow(e) }
+    when (val s = state) {
+        DetailState.Loading -> Box(modifier = Modifier.fillMaxSize())
+        DetailState.Missing -> {
+            LaunchedEffect(Unit) { onBack() }
+            EmptyState(
+                icon = Icons.Outlined.History,
+                title = stringResource(R.string.detail_missing_title),
+                subtitle = stringResource(R.string.detail_missing_subtitle),
+            )
         }
-        ActionBar(
-            onCopy = { copy(e) },
-            onArchive = if (e.type != "notes") {
+        is DetailState.Loaded -> Loaded(
+            entity = s.entity,
+            onCopy = { copy(s.entity) },
+            onArchive = if (s.entity.type != "notes") {
                 {
                     vm.archive()
                     onBack()
@@ -90,6 +88,34 @@ fun RecordDetailScreen(
                 vm.delete()
                 onBack()
             },
+        )
+    }
+}
+
+@Composable
+private fun Loaded(
+    entity: HistoryEntity,
+    onCopy: () -> Unit,
+    onArchive: (() -> Unit)?,
+    onDelete: () -> Unit,
+) {
+    Box(modifier = Modifier.fillMaxSize()) {
+        LazyColumn(
+            modifier = Modifier.fillMaxSize(),
+            contentPadding = PaddingValues(start = 16.dp, end = 16.dp, top = 8.dp, bottom = 80.dp),
+            verticalArrangement = Arrangement.spacedBy(16.dp),
+        ) {
+            item { TypeChipRow(entity) }
+            item { PrimaryBlock(entity) }
+            entity.screenshotPath?.let { path ->
+                item { ScreenshotBlock(path) }
+            }
+            item { CreatedAtRow(entity) }
+        }
+        ActionBar(
+            onCopy = onCopy,
+            onArchive = onArchive,
+            onDelete = onDelete,
             modifier = Modifier.align(Alignment.BottomCenter),
         )
     }
@@ -135,18 +161,13 @@ private fun PrimaryBlock(entity: HistoryEntity) {
 
 @Composable
 private fun ScreenshotBlock(path: String) {
-    val context = LocalContext.current
     Surface(
         modifier = Modifier.fillMaxWidth().aspectRatio(0.7f),
         shape = RoundedCornerShape(20.dp),
         color = MaterialTheme.colorScheme.surfaceVariant,
     ) {
-        AsyncImage(
-            model = ImageRequest.Builder(context)
-                .data(File(path))
-                .crossfade(true)
-                .build(),
-            contentDescription = null,
+        ScreenshotImage(
+            path = path,
             contentScale = ContentScale.Fit,
             modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(20.dp)),
         )

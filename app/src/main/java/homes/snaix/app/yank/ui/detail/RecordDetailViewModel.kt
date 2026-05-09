@@ -9,16 +9,24 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.launch
 
+sealed interface DetailState {
+    data object Loading : DetailState
+    data class Loaded(val entity: HistoryEntity) : DetailState
+    data object Missing : DetailState
+}
+
 class RecordDetailViewModel(
     private val repo: HistoryRepository,
     private val id: String,
 ) : ViewModel() {
 
-    private val _entity = MutableStateFlow<HistoryEntity?>(null)
-    val entity: StateFlow<HistoryEntity?> = _entity.asStateFlow()
+    private val _state = MutableStateFlow<DetailState>(DetailState.Loading)
+    val state: StateFlow<DetailState> = _state.asStateFlow()
 
     init {
-        viewModelScope.launch { _entity.value = repo.get(id) }
+        viewModelScope.launch {
+            _state.value = repo.get(id)?.let(DetailState::Loaded) ?: DetailState.Missing
+        }
     }
 
     fun delete() = viewModelScope.launch { repo.delete(id) }

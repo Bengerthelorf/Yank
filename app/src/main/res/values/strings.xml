@@ -96,6 +96,8 @@
     <!-- Detail screen -->
     <string name="detail_title">Detail</string>
     <string name="detail_created_at">Captured %1$s</string>
+    <string name="detail_missing_title">Record not found</string>
+    <string name="detail_missing_subtitle">It may have been deleted while you were elsewhere.</string>
 
     <!-- Records empty states -->
     <string name="empty_filter_title">No records for this filter</string>

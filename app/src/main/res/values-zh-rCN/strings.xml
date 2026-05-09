@@ -96,6 +96,8 @@
     <!-- Detail screen -->
     <string name="detail_title">详情</string>
     <string name="detail_created_at">捕获于 %1$s</string>
+    <string name="detail_missing_title">记录已不存在</string>
+    <string name="detail_missing_subtitle">可能在你离开时已被删除。</string>
 
     <!-- Records empty states -->
     <string name="empty_filter_title">该筛选下没有记录</string>

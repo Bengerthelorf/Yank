@@ -17,16 +17,12 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.layout.ContentScale
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
-import coil.compose.AsyncImage
-import coil.request.ImageRequest
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.data.db.HistoryEntity
+import homes.snaix.app.yank.ui.common.ScreenshotImage
 import homes.snaix.app.yank.ui.theme.LocalTypeColors
-import java.io.File
 import java.text.SimpleDateFormat
 import java.util.Date
 import java.util.Locale
@@ -78,26 +74,13 @@ fun TypeCard(
                 )
             }
             entity.screenshotPath?.let { path ->
-                ScreenshotThumbnail(path)
+                ScreenshotImage(
+                    path = path,
+                    modifier = Modifier.size(72.dp).clip(RoundedCornerShape(14.dp)),
+                )
             }
         }
     }
-}
-
-@Composable
-private fun ScreenshotThumbnail(path: String) {
-    val context = LocalContext.current
-    AsyncImage(
-        model = ImageRequest.Builder(context)
-            .data(File(path))
-            .crossfade(true)
-            .build(),
-        contentDescription = null,
-        contentScale = ContentScale.Crop,
-        modifier = Modifier
-            .size(72.dp)
-            .clip(RoundedCornerShape(14.dp)),
-    )
 }
 
 private fun formatTime(epochMs: Long): String =

@@ -187,13 +187,10 @@ fun YankNavGraph() {
 }
 
 @Composable
-private fun topTitle(currentRoute: String?): String = when (currentRoute) {
-    TopDest.Records.route   -> stringResource(R.string.tab_records)
-    TopDest.Notes.route     -> stringResource(R.string.tab_notes)
-    TopDest.Reminders.route -> stringResource(R.string.tab_reminders)
-    TopDest.Settings.route  -> stringResource(R.string.tab_settings)
-    else -> ""
-}
+private fun topTitle(currentRoute: String?): String =
+    TopDest.entries.firstOrNull { it.route == currentRoute }
+        ?.let { stringResource(it.labelRes) }
+        .orEmpty()
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
