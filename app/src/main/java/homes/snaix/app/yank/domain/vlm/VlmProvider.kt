@@ -18,6 +18,36 @@ enum class VlmProvider(
         fastModel = "doubao-seed-1-6-vision",
         capableModel = "doubao-1-5-vision-pro-32k-250115",
     ),
+    ZHIPU(
+        displayName = "智谱 GLM",
+        baseUrl = "https://open.bigmodel.cn/api/paas/v4/",
+        fastModel = "glm-4v-flash",
+        capableModel = "glm-4v-plus",
+    ),
+    MOONSHOT(
+        displayName = "月之暗面 (Kimi)",
+        baseUrl = "https://api.moonshot.cn/v1",
+        fastModel = "moonshot-v1-8k-vision-preview",
+        capableModel = "moonshot-v1-32k-vision-preview",
+    ),
+    LINGYIWANWU(
+        displayName = "零一万物 (Yi)",
+        baseUrl = "https://api.lingyiwanwu.com/v1",
+        fastModel = "yi-vision-v2",
+        capableModel = "yi-vision-v2",
+    ),
+    SILICONFLOW(
+        displayName = "硅基流动 (SiliconFlow)",
+        baseUrl = "https://api.siliconflow.cn/v1",
+        fastModel = "Qwen/Qwen2.5-VL-7B-Instruct",
+        capableModel = "Qwen/Qwen2.5-VL-72B-Instruct",
+    ),
+    HUNYUAN(
+        displayName = "腾讯混元",
+        baseUrl = "https://api.hunyuan.cloud.tencent.com/v1",
+        fastModel = "hunyuan-vision",
+        capableModel = "hunyuan-vision",
+    ),
     OPENAI(
         displayName = "OpenAI",
         baseUrl = "https://api.openai.com/v1",
