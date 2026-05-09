@@ -37,15 +37,19 @@ class NotesViewModel(
             val recognition: homes.snaix.app.yank.domain.schema.Recognition =
                 homes.snaix.app.yank.domain.schema.Recognition.Note(
                     title = title?.takeIf { it.isNotBlank() },
-                    number = body,
+                    body = body,
                     date = date,
                     time = time,
                 )
+            val noteForDisplay = recognition as homes.snaix.app.yank.domain.schema.Recognition.Note
             val entity = HistoryEntity(
                 id = UUID.randomUUID().toString(),
                 type = "notes",
-                displayPrimary = (recognition as homes.snaix.app.yank.domain.schema.Recognition.Note).title ?: body.take(20),
-                displaySecondary = listOfNotNull(date, time).joinToString(" ").ifEmpty { null },
+                displayPrimary = noteForDisplay.title
+                    ?: body.lineSequence().firstOrNull()?.take(40).orEmpty(),
+                displaySecondary = if (!noteForDisplay.title.isNullOrBlank())
+                    body.lineSequence().firstOrNull()?.trim()?.take(80)
+                else listOfNotNull(date, time).joinToString(" ").ifEmpty { null },
                 rawText = listOfNotNull(title, body).joinToString(" "),
                 rawJson = Json.encodeToString(recognition),
                 zxingPayloads = null,

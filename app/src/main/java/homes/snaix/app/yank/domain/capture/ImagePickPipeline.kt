@@ -6,6 +6,7 @@ import android.graphics.ImageDecoder
 import android.net.Uri
 import android.util.Log
 import homes.snaix.app.yank.data.db.Source
+import java.io.File
 
 class ImagePickPipeline(
     private val context: Context,
@@ -19,20 +20,55 @@ class ImagePickPipeline(
         return capture.process(downscaled, source = Source.IMAGE_PICK)
     }
 
-    private fun decodeBitmap(uri: Uri): Bitmap? = runCatching {
-        // ImageDecoder handles modern formats (HEIC, AVIF, animated WebP first
-        // frame) and applies EXIF orientation automatically — BitmapFactory.
-        // decodeStream silently returns null on many of those.
-        // ALLOCATOR_SOFTWARE is required because the bitmap later gets passed
-        // to Bitmap.compress(PNG) and createScaledBitmap, both of which fail
-        // on hardware-backed bitmaps that ImageDecoder otherwise produces.
+    /**
+     * Decode strategy:
+     *
+     *   1. Try [ImageDecoder] directly against the content URI. Fastest path
+     *      and handles HEIC/AVIF/animated-WebP/EXIF rotation natively
+     *      (we're on minSdk 29).
+     *   2. If that fails, copy the URI's bytes to a local cache file first
+     *      and try [ImageDecoder] against the file. This recovers from:
+     *        - Google Photos / Drive cloud URIs that intermittently return
+     *          partial streams or fail seekable-source assertions.
+     *        - Some HEIC variants that need a fully-buffered source.
+     *
+     * Both paths force [ImageDecoder.ALLOCATOR_SOFTWARE] because the bitmap
+     * is later passed to [Bitmap.compress] (PNG) and [Bitmap.createScaledBitmap]
+     * — both throw on hardware-backed bitmaps.
+     */
+    private fun decodeBitmap(uri: Uri): Bitmap? {
+        runCatching { decodeViaImageDecoder(uri) }
+            .onSuccess { return it }
+            .onFailure { Log.w(TAG, "ImageDecoder direct path failed for $uri, retrying via cache", it) }
+
+        return runCatching { decodeViaCacheFile(uri) }
+            .onFailure { Log.e(TAG, "decodeBitmap fallback failed for $uri", it) }
+            .getOrNull()
+    }
+
+    private fun decodeViaImageDecoder(uri: Uri): Bitmap {
         val source = ImageDecoder.createSource(context.contentResolver, uri)
-        ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+        return ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
             decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
         }
-    }.onFailure {
-        Log.e(TAG, "decodeBitmap failed for $uri", it)
-    }.getOrNull()
+    }
+
+    private fun decodeViaCacheFile(uri: Uri): Bitmap {
+        val tmp = File.createTempFile("imgpick_", ".bin", context.cacheDir)
+        try {
+            context.contentResolver.openInputStream(uri).use { input ->
+                checkNotNull(input) { "openInputStream returned null for $uri" }
+                tmp.outputStream().use { input.copyTo(it) }
+            }
+            check(tmp.length() > 0) { "downloaded $uri is empty (${tmp.length()} bytes)" }
+            val source = ImageDecoder.createSource(tmp)
+            return ImageDecoder.decodeBitmap(source) { decoder, _, _ ->
+                decoder.allocator = ImageDecoder.ALLOCATOR_SOFTWARE
+            }
+        } finally {
+            tmp.delete()
+        }
+    }
 
     private fun downscaleIfNeeded(src: Bitmap, longEdgeMax: Int): Bitmap {
         val long = maxOf(src.width, src.height)

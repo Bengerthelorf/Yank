@@ -31,7 +31,7 @@ class DedupKeyTest {
     }
 
     @Test fun note_key_is_unique_uuid_per_call() {
-        val r = Recognition.Note(number = "x")
+        val r = Recognition.Note(body = "x")
         val k1 = dedupKey(r); val k2 = dedupKey(r)
         assertThat(k1).isNotEqualTo(k2)
     }

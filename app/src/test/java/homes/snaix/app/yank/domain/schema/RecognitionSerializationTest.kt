@@ -31,10 +31,16 @@ class RecognitionSerializationTest {
         assertThat(r.flightNo).isNull()
     }
 
-    @Test fun `parses notes with optional fields`() {
+    @Test fun `parses notes with optional fields (current body wire name)`() {
+        val raw = """{"type":"notes","title":"abc","body":"summary"}"""
+        val r = json.decodeFromString<Recognition>(raw) as Recognition.Note
+        assertThat(r.body).isEqualTo("summary")
+    }
+
+    @Test fun `parses notes with legacy number wire name (backward compat alias)`() {
         val raw = """{"type":"notes","title":"abc","number":"summary"}"""
         val r = json.decodeFromString<Recognition>(raw) as Recognition.Note
-        assertThat(r.number).isEqualTo("summary")
+        assertThat(r.body).isEqualTo("summary")
     }
 
     @Test fun `decodes 排队 券码 快递`() {

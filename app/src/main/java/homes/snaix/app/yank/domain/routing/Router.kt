@@ -142,5 +142,5 @@ private fun Recognition.rawTextBlob(): String = when (this) {
     is Recognition.Express -> listOfNotNull(number, brand, address, station, tracking, remark).joinToString(" ")
     is Recognition.Ticket  -> listOfNotNull(trainNo, fromStation, toStation, flightNo, departureAirport, arrivalAirport, store, movie, date, time, gate).joinToString(" ")
     is Recognition.Todo    -> listOfNotNull(title, date, time, location, remark).joinToString(" ")
-    is Recognition.Note    -> listOfNotNull(title, number, date, time).joinToString(" ")
+    is Recognition.Note    -> listOfNotNull(title, body, date, time).joinToString(" ")
 }

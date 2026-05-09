@@ -88,7 +88,12 @@ sealed class Recognition {
     @Serializable @SerialName("notes")
     data class Note(
         val title: String? = null,
-        val number: String? = null,
+        // The free-form summary body. Wire name was historically `number`
+        // (semantically wrong); accept both via @JsonNames so model output and
+        // old cached rawJson both still parse, but always serialize as `body`.
+        @SerialName("body")
+        @kotlinx.serialization.json.JsonNames("body", "number")
+        val body: String? = null,
         val date: String? = null,
         val time: String? = null,
     ) : Recognition()

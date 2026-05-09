@@ -16,10 +16,15 @@ class DisplayFieldsTest {
         assertThat(r.displaySecondary()).isEqualTo("北京 → 上海")
     }
 
-    @Test fun `note primary is title or number prefix`() {
-        val r1 = Recognition.Note(title = "标题", number = "正文")
-        val r2 = Recognition.Note(number = "只有正文这是个长文本")
+    @Test fun `note primary is title or first body line prefix`() {
+        val r1 = Recognition.Note(title = "标题", body = "正文")
+        val r2 = Recognition.Note(body = "只有正文这是个长文本")
         assertThat(r1.displayPrimary()).isEqualTo("标题")
         assertThat(r2.displayPrimary()).startsWith("只有正文")
+    }
+
+    @Test fun `note secondary previews body when title is set`() {
+        val r = Recognition.Note(title = "M3E 设计", body = "总结这张截图的关键信息和上下文。")
+        assertThat(r.displaySecondary()).isEqualTo("总结这张截图的关键信息和上下文。")
     }
 }
