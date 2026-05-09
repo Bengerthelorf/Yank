@@ -12,12 +12,15 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -34,7 +37,7 @@ import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.ui.common.EmptyState
 import kotlinx.coroutines.launch
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun RecordsScreen() {
     val ctx = LocalContext.current.applicationContext as YankApp
@@ -54,6 +57,8 @@ fun RecordsScreen() {
         }
     }
 
+    val fabShape = MaterialShapes.Cookie9Sided.toShape()
+
     Scaffold(
         topBar = {
             LargeTopAppBar(
@@ -62,7 +67,10 @@ fun RecordsScreen() {
             )
         },
         floatingActionButton = {
-            FloatingActionButton(onClick = { pickImage.launch("image/*") }) {
+            FloatingActionButton(
+                onClick = { pickImage.launch("image/*") },
+                shape = fabShape,
+            ) {
                 Icon(Icons.Outlined.PhotoCamera, contentDescription = "选图识别")
             }
         },

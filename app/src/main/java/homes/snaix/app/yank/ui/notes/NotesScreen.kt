@@ -13,12 +13,15 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.Card
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FloatingActionButton
 import androidx.compose.material3.Icon
 import androidx.compose.material3.LargeTopAppBar
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -36,7 +39,7 @@ import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.ui.common.EmptyState
 
-@OptIn(ExperimentalMaterial3Api::class)
+@OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun NotesScreen() {
     val ctx = LocalContext.current.applicationContext as YankApp
@@ -46,10 +49,15 @@ fun NotesScreen() {
     val items by vm.items.collectAsState()
     var sheetOpen by remember { mutableStateOf(false) }
 
+    val fabShape = MaterialShapes.Cookie9Sided.toShape()
+
     Scaffold(
         topBar = { LargeTopAppBar(title = { Text(stringResource(R.string.tab_notes)) }) },
         floatingActionButton = {
-            FloatingActionButton(onClick = { sheetOpen = true }) {
+            FloatingActionButton(
+                onClick = { sheetOpen = true },
+                shape = fabShape,
+            ) {
                 Icon(Icons.Outlined.Edit, contentDescription = "手写新建")
             }
         },

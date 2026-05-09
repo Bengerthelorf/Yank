@@ -5,9 +5,10 @@ import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.Settings
+import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.Icon
-import androidx.compose.material3.NavigationBar
-import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.ShortNavigationBar
+import androidx.compose.material3.ShortNavigationBarItem
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -26,13 +27,14 @@ enum class TopDest(val route: String, val labelRes: Int, val icon: ImageVector) 
     Settings("settings", R.string.tab_settings, Icons.Outlined.Settings),
 }
 
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
 fun BottomNav(navController: NavHostController) {
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination
-    NavigationBar {
+    ShortNavigationBar {
         TopDest.entries.forEach { dest ->
-            NavigationBarItem(
+            ShortNavigationBarItem(
                 selected = current?.hierarchy?.any { it.route == dest.route } == true,
                 onClick = {
                     navController.navigate(dest.route) {
