@@ -1,5 +1,6 @@
 package homes.snaix.app.yank.ui.nav
 
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
@@ -32,13 +33,15 @@ enum class TopDest(val route: String, val labelRes: Int, val icon: ImageVector) 
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun BottomNav(navController: NavHostController, modifier: Modifier = Modifier) {
+fun BottomNav(
+    navController: NavHostController,
+    fab: (@Composable () -> Unit)? = null,
+    modifier: Modifier = Modifier,
+) {
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination
-    HorizontalFloatingToolbar(
-        expanded = true,
-        modifier = modifier,
-    ) {
+
+    val content: @Composable RowScope.() -> Unit = {
         TopDest.entries.forEach { dest ->
             val selected = current?.hierarchy?.any { it.route == dest.route } == true
             val onClick: () -> Unit = {
@@ -64,5 +67,20 @@ fun BottomNav(navController: NavHostController, modifier: Modifier = Modifier) {
                 ) { Icon(dest.icon, contentDescription = null) }
             }
         }
+    }
+
+    if (fab != null) {
+        HorizontalFloatingToolbar(
+            expanded = true,
+            floatingActionButton = fab,
+            modifier = modifier,
+            content = content,
+        )
+    } else {
+        HorizontalFloatingToolbar(
+            expanded = true,
+            modifier = modifier,
+            content = content,
+        )
     }
 }

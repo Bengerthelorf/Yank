@@ -8,10 +8,7 @@ import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.NotificationsActive
-import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.LargeTopAppBar
 import androidx.compose.material3.MaterialTheme
-import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -21,14 +18,13 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
-import androidx.lifecycle.viewmodel.viewModelFactory
 import androidx.lifecycle.viewmodel.initializer
+import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.ui.common.EmptyState
 import homes.snaix.app.yank.ui.records.TypeCard
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun RemindersScreen() {
     val ctx = LocalContext.current.applicationContext as YankApp
@@ -37,30 +33,47 @@ fun RemindersScreen() {
     })
     val state by vm.state.collectAsState()
 
-    Scaffold(topBar = { LargeTopAppBar(title = { Text(stringResource(R.string.tab_reminders)) }) }) { padding ->
-        if (state.active.isEmpty() && state.upcoming.isEmpty()) {
-            EmptyState(
-                Icons.Outlined.NotificationsActive,
-                stringResource(R.string.empty_reminders_title),
-                stringResource(R.string.empty_reminders_subtitle),
-                modifier = Modifier.padding(padding),
-            )
-        } else {
-            LazyColumn(modifier = Modifier.fillMaxSize().padding(padding)) {
-                if (state.active.isNotEmpty()) {
-                    item { Text("进行中", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
-                    items(state.active, key = { it.id }) { e ->
-                        TypeCard(entity = e, onClick = {}, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
-                    }
+    if (state.active.isEmpty() && state.upcoming.isEmpty()) {
+        EmptyState(
+            Icons.Outlined.NotificationsActive,
+            stringResource(R.string.empty_reminders_title),
+            stringResource(R.string.empty_reminders_subtitle),
+        )
+    } else {
+        LazyColumn(modifier = Modifier.fillMaxSize()) {
+            if (state.active.isNotEmpty()) {
+                item {
+                    Text(
+                        "进行中",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(16.dp),
+                    )
                 }
-                if (state.upcoming.isNotEmpty()) {
-                    item { Text("即将开始", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(16.dp)) }
-                    items(state.upcoming, key = { it.id }) { e ->
-                        TypeCard(entity = e, onClick = {}, modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp))
-                    }
+                items(state.active, key = { it.id }) { e ->
+                    TypeCard(
+                        entity = e,
+                        onClick = {},
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    )
                 }
-                item { Spacer(Modifier.height(96.dp)) }
             }
+            if (state.upcoming.isNotEmpty()) {
+                item {
+                    Text(
+                        "即将开始",
+                        style = MaterialTheme.typography.titleMedium,
+                        modifier = Modifier.padding(16.dp),
+                    )
+                }
+                items(state.upcoming, key = { it.id }) { e ->
+                    TypeCard(
+                        entity = e,
+                        onClick = {},
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    )
+                }
+            }
+            item { Spacer(Modifier.height(96.dp)) }
         }
     }
 }
