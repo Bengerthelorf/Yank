@@ -32,15 +32,13 @@ import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.domain.schema.Recognition
+import homes.snaix.app.yank.domain.schema.RecognitionJson
 import homes.snaix.app.yank.ui.common.EmptyState
 import homes.snaix.app.yank.ui.common.SwipeAction
 import homes.snaix.app.yank.ui.common.SwipeActionsBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
 import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
-import kotlinx.serialization.json.Json
-
-private val NotesJson = Json { ignoreUnknownKeys = true }
 
 @Composable
 fun NotesScreen(onOpenDetail: (String) -> Unit) {
@@ -86,7 +84,9 @@ fun NotesScreen(onOpenDetail: (String) -> Unit) {
     menu.Host()
 
     editTarget?.let { entity ->
-        val note = NotesJson.decodeFromString<Recognition>(entity.rawJson) as Recognition.Note
+        val note = remember(entity.id) {
+            RecognitionJson.decodeFromString<Recognition>(entity.rawJson) as Recognition.Note
+        }
         ManualNoteSheet(
             onDismiss = { editTarget = null },
             onSave = { title, body, date, time -> vm.updateNote(entity, title, body, date, time) },

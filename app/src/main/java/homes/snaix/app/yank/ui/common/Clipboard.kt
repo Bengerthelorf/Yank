@@ -8,8 +8,8 @@ import androidx.compose.ui.platform.ClipEntry
 import androidx.compose.ui.platform.LocalClipboard
 import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.domain.schema.Recognition
+import homes.snaix.app.yank.domain.schema.RecognitionJson
 import kotlinx.coroutines.launch
-import kotlinx.serialization.json.Json
 
 @Composable
 fun rememberCopyEntity(): (HistoryEntity) -> Unit {
@@ -25,10 +25,8 @@ fun rememberCopyEntity(): (HistoryEntity) -> Unit {
     }
 }
 
-private val CopyJson = Json { ignoreUnknownKeys = true }
-
 private fun HistoryEntity.copyableText(): String {
     if (type != "notes") return displayPrimary
-    val note = CopyJson.decodeFromString<Recognition>(rawJson) as Recognition.Note
+    val note = RecognitionJson.decodeFromString<Recognition>(rawJson) as Recognition.Note
     return note.body ?: note.title.orEmpty()
 }

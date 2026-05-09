@@ -71,5 +71,9 @@ class RecordsViewModel(
     }
     fun updatePrimary(entity: HistoryEntity, newPrimary: String) = viewModelScope.launch {
         repo.updatePrimary(entity, newPrimary)
+        // Refresh any live notification so the user sees the corrected text.
+        // PinRefreshWorker only handles Ticket/Todo, so for the other types
+        // re-running the publisher is the only way to update the tray.
+        if (!entity.archived) repo.get(entity.id)?.let { router.repin(it) }
     }
 }

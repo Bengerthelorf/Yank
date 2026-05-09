@@ -22,6 +22,31 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import homes.snaix.app.yank.R
+import homes.snaix.app.yank.data.db.HistoryEntity
+
+class EditPrimaryHost internal constructor(
+    val open: (HistoryEntity) -> Unit,
+    val Host: @Composable () -> Unit,
+)
+
+@Composable
+fun rememberEditPrimaryHost(
+    onSave: (HistoryEntity, String) -> Unit,
+): EditPrimaryHost {
+    var target by remember { mutableStateOf<HistoryEntity?>(null) }
+    return EditPrimaryHost(
+        open = { target = it },
+        Host = {
+            target?.let { entity ->
+                EditPrimarySheet(
+                    initial = entity.displayPrimary,
+                    onDismiss = { target = null },
+                    onSave = { onSave(entity, it) },
+                )
+            }
+        },
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

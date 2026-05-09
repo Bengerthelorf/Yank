@@ -6,6 +6,7 @@ import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.data.db.Source
 import homes.snaix.app.yank.data.repo.HistoryRepository
 import homes.snaix.app.yank.domain.schema.Recognition
+import homes.snaix.app.yank.domain.schema.RecognitionJson
 import homes.snaix.app.yank.domain.schema.TicketSubType
 import homes.snaix.app.yank.domain.schema.displayPrimary
 import homes.snaix.app.yank.domain.schema.displaySecondary
@@ -16,6 +17,7 @@ import homes.snaix.app.yank.domain.time.EventClock
 import kotlinx.serialization.encodeToString
 import kotlinx.serialization.json.Json
 import java.util.UUID
+
 
 interface PinPublisher {
     suspend fun publish(history: HistoryEntity, notificationId: Int, recognition: Recognition, payload: String?)
@@ -35,7 +37,7 @@ class Router(
     private val clock: EventClock = EventClock(),
     private val nextNotificationId: () -> Int,
     private val now: () -> Long = System::currentTimeMillis,
-    private val json: Json = Json { ignoreUnknownKeys = true; encodeDefaults = true },
+    private val json: Json = RecognitionJson,
 ) {
 
     suspend fun route(

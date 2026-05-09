@@ -36,5 +36,6 @@ class RemindersViewModel(
     }
     fun updatePrimary(entity: HistoryEntity, newPrimary: String) = viewModelScope.launch {
         repo.updatePrimary(entity, newPrimary)
+        if (!entity.archived) repo.get(entity.id)?.let { router.repin(it) }
     }
 }

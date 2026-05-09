@@ -13,9 +13,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.mutableStateOf
-import androidx.compose.runtime.remember
-import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -25,11 +22,10 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
-import homes.snaix.app.yank.data.db.HistoryEntity
-import homes.snaix.app.yank.ui.common.EditPrimarySheet
 import homes.snaix.app.yank.ui.common.EmptyState
 import homes.snaix.app.yank.ui.common.SwipeActionsBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
+import homes.snaix.app.yank.ui.common.rememberEditPrimaryHost
 import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
 import homes.snaix.app.yank.ui.common.rememberSwipeActions
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
@@ -43,11 +39,11 @@ fun RemindersScreen(onOpenDetail: (String) -> Unit) {
     })
     val state by vm.state.collectAsState()
     val copy = rememberCopyEntity()
-    var editTarget by remember { mutableStateOf<HistoryEntity?>(null) }
+    val edit = rememberEditPrimaryHost { entity, value -> vm.updatePrimary(entity, value) }
     val menu = rememberRecordActionMenu(
         onCopy = copy,
         onDelete = { vm.delete(it.id) },
-        onEdit = { editTarget = it },
+        onEdit = edit.open,
         onArchive = { vm.archive(it.id) },
     )
     val swipe = rememberSwipeActions(
@@ -115,12 +111,5 @@ fun RemindersScreen(onOpenDetail: (String) -> Unit) {
     }
 
     menu.Host()
-
-    editTarget?.let { entity ->
-        EditPrimarySheet(
-            initial = entity.displayPrimary,
-            onDismiss = { editTarget = null },
-            onSave = { vm.updatePrimary(entity, it) },
-        )
-    }
+    edit.Host()
 }

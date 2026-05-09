@@ -5,15 +5,13 @@ import homes.snaix.app.yank.data.db.DedupEntity
 import homes.snaix.app.yank.data.db.HistoryDao
 import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.domain.schema.Recognition
+import homes.snaix.app.yank.domain.schema.RecognitionJson
 import homes.snaix.app.yank.domain.schema.displayPrimary
 import homes.snaix.app.yank.domain.schema.displaySecondary
 import homes.snaix.app.yank.domain.schema.rawTextBlob
 import homes.snaix.app.yank.domain.schema.withPrimary
 import kotlinx.coroutines.flow.Flow
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
-
-private val EditJson = Json { ignoreUnknownKeys = true; encodeDefaults = true }
 
 class HistoryRepository(
     private val historyDao: HistoryDao,
@@ -26,11 +24,11 @@ class HistoryRepository(
     suspend fun deleteArchivedBefore(before: Long): Int = historyDao.deleteArchivedBefore(before)
 
     suspend fun updatePrimary(entity: HistoryEntity, newPrimary: String) {
-        val r = EditJson.decodeFromString<Recognition>(entity.rawJson).withPrimary(newPrimary)
+        val r = RecognitionJson.decodeFromString<Recognition>(entity.rawJson).withPrimary(newPrimary)
         upsert(entity.copy(
             displayPrimary = r.displayPrimary(),
             displaySecondary = r.displaySecondary(),
-            rawJson = EditJson.encodeToString(r),
+            rawJson = RecognitionJson.encodeToString(r),
             rawText = r.rawTextBlob(),
         ))
     }
@@ -51,7 +49,7 @@ class HistoryRepository(
         upsert(entity.copy(
             displayPrimary = r.displayPrimary(),
             displaySecondary = r.displaySecondary(),
-            rawJson = EditJson.encodeToString<Recognition>(r),
+            rawJson = RecognitionJson.encodeToString<Recognition>(r),
             rawText = r.rawTextBlob(),
         ))
     }

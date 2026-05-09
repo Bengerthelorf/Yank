@@ -46,7 +46,13 @@ fun Recognition.withPrimary(newPrimary: String): Recognition = when (this) {
         TicketSubType.TRAIN   -> copy(trainNo = newPrimary)
         TicketSubType.FLIGHT  -> copy(flightNo = newPrimary)
         TicketSubType.MOVIE   -> copy(movie = newPrimary)
-        TicketSubType.GENERIC -> copy(store = newPrimary)
+        // Match displayPrimary's `store ?: movie ?: time` precedence so the
+        // edited field is the same one the sheet displayed as the initial value.
+        TicketSubType.GENERIC -> when {
+            store != null -> copy(store = newPrimary)
+            movie != null -> copy(movie = newPrimary)
+            else          -> copy(time = newPrimary)
+        }
     }
     is Recognition.Todo -> copy(title = newPrimary)
     is Recognition.Note -> copy(title = newPrimary)
