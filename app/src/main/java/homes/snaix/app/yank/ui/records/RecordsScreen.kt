@@ -1,5 +1,8 @@
 package homes.snaix.app.yank.ui.records
 
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -24,7 +27,8 @@ import homes.snaix.app.yank.ui.common.EmptyState
 
 @Composable
 fun RecordsScreen() {
-    val ctx = LocalContext.current.applicationContext as YankApp
+    val context = LocalContext.current
+    val ctx = context.applicationContext as YankApp
     val vm: RecordsViewModel = viewModel(factory = viewModelFactory {
         initializer { RecordsViewModel(ctx.di.historyRepo) }
     })
@@ -44,7 +48,10 @@ fun RecordsScreen() {
             items(items, key = { it.id }) { entity ->
                 TypeCard(
                     entity = entity,
-                    onClick = { /* Phase 17 detail sheet */ },
+                    onClick = {
+                        val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                        cm.setPrimaryClip(ClipData.newPlainText("Yank", entity.displayPrimary))
+                    },
                     modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                 )
             }
