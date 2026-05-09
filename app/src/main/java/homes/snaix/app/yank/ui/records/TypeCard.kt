@@ -26,36 +26,18 @@ fun TypeCard(
     onClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTypeColors.current
-    // Match the JSON-discriminator type (which is always Chinese; it's a model contract value)
-    // back to a UI color role.
-    val role = remember(entity.type) {
-        when (entity.type) {
-            "排队" -> colors.queue
-            "取餐" -> colors.pickup
-            "券码" -> colors.voucher
-            "快递" -> colors.express
-            "票券" -> colors.ticket
-            "待办" -> colors.todo
-            else   -> colors.notes
-        }
-    }
-    // Translated display label for the same type; falls back to the raw discriminator
-    // (e.g. "notes") when the type isn't one of the seven enum values.
-    val typeLabel = when (entity.type) {
-        "排队" -> stringResource(R.string.type_label_queue)
-        "取餐" -> stringResource(R.string.type_label_pickup)
-        "券码" -> stringResource(R.string.type_label_voucher)
-        "快递" -> stringResource(R.string.type_label_express)
-        "票券" -> stringResource(R.string.type_label_ticket)
-        "待办" -> stringResource(R.string.type_label_todo)
-        "notes" -> stringResource(R.string.type_label_notes)
-        else -> entity.type
+    val typeColors = LocalTypeColors.current
+    val knownType = remember(entity.type) { RecordType.fromDiscriminator(entity.type) }
+    val role = if (knownType != null) typeColors.roleFor(knownType) else typeColors.notes
+    val typeLabel = when {
+        knownType != null    -> stringResource(knownType.labelRes)
+        entity.type == "notes" -> stringResource(R.string.type_label_notes)
+        else                 -> entity.type
     }
     Card(
         modifier = modifier.fillMaxWidth(),
         shape = RoundedCornerShape(20.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = role.container),
+        colors = CardDefaults.cardColors(containerColor = role.container),
         onClick = onClick,
     ) {
         Column(modifier = Modifier.padding(16.dp)) {
@@ -81,4 +63,3 @@ fun TypeCard(
 
 private fun formatTime(epochMs: Long): String =
     SimpleDateFormat("HH:mm", Locale.getDefault()).format(Date(epochMs))
-

@@ -1,7 +1,9 @@
 package homes.snaix.app.yank.ui.records
 
+import androidx.annotation.StringRes
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import homes.snaix.app.yank.R
 import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.data.repo.HistoryRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
@@ -11,24 +13,38 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
+import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
-enum class RecordFilter(val type: String?, val labelRes: Int) {
-    All(null, homes.snaix.app.yank.R.string.filter_all),
-    Queue("排队", homes.snaix.app.yank.R.string.filter_queue),
-    Pickup("取餐", homes.snaix.app.yank.R.string.filter_pickup),
-    Voucher("券码", homes.snaix.app.yank.R.string.filter_voucher),
-    Express("快递", homes.snaix.app.yank.R.string.filter_express),
-    Ticket("票券", homes.snaix.app.yank.R.string.filter_ticket),
-    Todo("待办", homes.snaix.app.yank.R.string.filter_todo),
-    Archived(null, homes.snaix.app.yank.R.string.filter_archived),
+/**
+ * Sealed model of the visible record filter on the Records screen.
+ *
+ * - [All]: no filter, all active (non-archived) records show.
+ * - [ByType]: a single type filter; the [RecordType] supplies discriminator
+ *   and label without RecordFilter ever knowing the discriminator string.
+ * - [Archived]: orthogonal "trash bin" view.
+ */
+sealed interface RecordFilter {
+    @get:StringRes val labelRes: Int
+
+    data object All : RecordFilter {
+        override val labelRes: Int = R.string.filter_all
+    }
+
+    data class ByType(val type: RecordType) : RecordFilter {
+        override val labelRes: Int get() = type.labelRes
+    }
+
+    data object Archived : RecordFilter {
+        override val labelRes: Int = R.string.filter_archived
+    }
 }
 
 class RecordsViewModel(
     private val repo: HistoryRepository,
 ) : ViewModel() {
 
-    private val _filter = MutableStateFlow(RecordFilter.All)
+    private val _filter = MutableStateFlow<RecordFilter>(RecordFilter.All)
     val filter: StateFlow<RecordFilter> = _filter.asStateFlow()
 
     private val _query = MutableStateFlow<String?>(null)
@@ -38,10 +54,23 @@ class RecordsViewModel(
     val items: StateFlow<List<HistoryEntity>> =
         combine(_filter, _query) { f, q -> f to q }
             .flatMapLatest { (f, q) ->
-                if (f == RecordFilter.Archived) repo.observeArchived(q)
-                else repo.observeRecords(f.type, q)
+                when (f) {
+                    RecordFilter.All        -> repo.observeRecords(null, q)
+                    is RecordFilter.ByType  -> repo.observeRecords(f.type.discriminator, q)
+                    RecordFilter.Archived   -> repo.observeArchived(q)
+                }
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
+
+    /**
+     * Whether the database has any active record at all, independent of the
+     * current filter. The screen uses this to distinguish the genuine "nothing
+     * to show yet" empty state from "the current filter matched nothing".
+     */
+    val hasAnyData: StateFlow<Boolean> =
+        repo.observeRecords(null, null)
+            .map { it.isNotEmpty() }
+            .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun setFilter(f: RecordFilter) { _filter.value = f }
     fun setQuery(q: String?) { _query.value = q?.takeIf { it.isNotBlank() } }

@@ -1,8 +1,6 @@
 package homes.snaix.app.yank.ui.records
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
+import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -10,6 +8,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.outlined.FilterAltOff
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
@@ -24,38 +23,55 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.ui.common.EmptyState
+import homes.snaix.app.yank.ui.common.rememberCopyEntity
+import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 
 @Composable
 fun RecordsScreen() {
-    val context = LocalContext.current
-    val ctx = context.applicationContext as YankApp
+    val app = LocalContext.current.applicationContext as YankApp
     val vm: RecordsViewModel = viewModel(factory = viewModelFactory {
-        initializer { RecordsViewModel(ctx.di.historyRepo) }
+        initializer { RecordsViewModel(app.di.historyRepo) }
     })
     val items by vm.items.collectAsState()
     val filter by vm.filter.collectAsState()
+    val hasAnyData by vm.hasAnyData.collectAsState()
+    val copy = rememberCopyEntity()
 
-    if (items.isEmpty()) {
+    if (!hasAnyData) {
+        // No record has ever been written — chips would be a dead-end, so suppress them.
         EmptyState(
             icon = Icons.Outlined.History,
             title = stringResource(R.string.empty_records_title),
             subtitle = stringResource(R.string.empty_records_subtitle),
         )
-    } else {
-        LazyColumn(modifier = Modifier.fillMaxSize()) {
-            item { FilterChipsRow(selected = filter, onSelected = vm::setFilter) }
-            item { Spacer(Modifier.height(12.dp)) }
-            items(items, key = { it.id }) { entity ->
-                TypeCard(
-                    entity = entity,
-                    onClick = {
-                        val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                        cm.setPrimaryClip(ClipData.newPlainText("Yank", entity.displayPrimary))
-                    },
-                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
-                )
+        return
+    }
+
+    Column(modifier = Modifier.fillMaxSize()) {
+        FilterChipsRow(
+            selected = filter,
+            onSelected = vm::setFilter,
+        )
+        Spacer(Modifier.height(12.dp))
+        if (items.isEmpty()) {
+            // We have data, just none for the current filter — keep chips visible
+            // (they're rendered above) so the user can clear or switch.
+            EmptyState(
+                icon = Icons.Outlined.FilterAltOff,
+                title = stringResource(R.string.empty_filter_title),
+                subtitle = stringResource(R.string.empty_filter_subtitle),
+            )
+        } else {
+            LazyColumn(modifier = Modifier.fillMaxSize()) {
+                items(items, key = { it.id }) { entity ->
+                    TypeCard(
+                        entity = entity,
+                        onClick = { copy(entity) },
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
+                    )
+                }
+                item { Spacer(Modifier.height(BottomNavReservedHeight)) }
             }
-            item { Spacer(Modifier.height(96.dp)) }
         }
     }
 }

@@ -9,8 +9,8 @@ import androidx.compose.material3.FilterChip
 import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import homes.snaix.app.yank.ui.theme.LocalTypeColors
@@ -21,21 +21,19 @@ fun FilterChipsRow(
     onSelected: (RecordFilter) -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    val colors = LocalTypeColors.current
+    val typeColors = LocalTypeColors.current
+    // Single ordered list of visible filters: all RecordType entries, plus Archived.
+    // RecordFilter.All is the implicit "no chip selected" state and is never rendered.
+    val visible: List<RecordFilter> = remember {
+        RecordType.entries.map<RecordType, RecordFilter> { RecordFilter.ByType(it) } +
+            RecordFilter.Archived
+    }
     Row(
         modifier = modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        RecordFilter.entries.filter { it != RecordFilter.All }.forEach { f ->
-            val (container, onContainer) = when (f) {
-                RecordFilter.Queue   -> colors.queue.container to colors.queue.onContainer
-                RecordFilter.Pickup  -> colors.pickup.container to colors.pickup.onContainer
-                RecordFilter.Voucher -> colors.voucher.container to colors.voucher.onContainer
-                RecordFilter.Express -> colors.express.container to colors.express.onContainer
-                RecordFilter.Ticket  -> colors.ticket.container to colors.ticket.onContainer
-                RecordFilter.Todo    -> colors.todo.container to colors.todo.onContainer
-                else                 -> Color.Unspecified to Color.Unspecified
-            }
+        visible.forEach { f ->
+            val role = (f as? RecordFilter.ByType)?.let { typeColors.roleFor(it.type) }
             FilterChip(
                 selected = selected == f,
                 onClick = {
@@ -43,9 +41,14 @@ fun FilterChipsRow(
                     else onSelected(f)
                 },
                 label = { Text(stringResource(f.labelRes)) },
-                colors = if (container != Color.Unspecified)
-                    FilterChipDefaults.filterChipColors(selectedContainerColor = container, selectedLabelColor = onContainer)
-                else FilterChipDefaults.filterChipColors(),
+                colors = if (role != null) {
+                    FilterChipDefaults.filterChipColors(
+                        selectedContainerColor = role.container,
+                        selectedLabelColor = role.onContainer,
+                    )
+                } else {
+                    FilterChipDefaults.filterChipColors()
+                },
             )
         }
     }

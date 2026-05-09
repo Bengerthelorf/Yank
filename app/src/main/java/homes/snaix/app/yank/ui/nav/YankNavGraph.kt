@@ -7,20 +7,14 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
-import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.PhotoCamera
-import androidx.compose.material3.CircularProgressIndicator
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
@@ -58,6 +52,7 @@ import androidx.navigation.compose.rememberNavController
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.domain.capture.PipelineOutcome
+import homes.snaix.app.yank.ui.common.ProcessingCard
 import homes.snaix.app.yank.ui.notes.ManualNoteSheet
 import homes.snaix.app.yank.ui.notes.NotesScreen
 import homes.snaix.app.yank.ui.notes.NotesViewModel
@@ -73,7 +68,7 @@ fun YankNavGraph() {
     val backStack by nav.currentBackStackEntryAsState()
     val currentRoute = backStack?.destination?.route
 
-    val ctx = LocalContext.current.applicationContext as YankApp
+    val app = LocalContext.current.applicationContext as YankApp
     val scope = rememberCoroutineScope()
 
     var processingCount by remember { mutableIntStateOf(0) }
@@ -81,7 +76,7 @@ fun YankNavGraph() {
     val savedMsg = stringResource(R.string.recognize_saved)
 
     LaunchedEffect(Unit) {
-        ctx.di.captureOutcomes.collect { outcome ->
+        app.di.captureOutcomes.collect { outcome ->
             if (outcome is PipelineOutcome.Success) {
                 snackbarHostState.showSnackbar(savedMsg)
             }
@@ -93,8 +88,8 @@ fun YankNavGraph() {
             scope.launch {
                 processingCount++
                 try {
-                    val outcome = ctx.di.imagePickPipeline.process(uri)
-                    ctx.di.captureOutcomeBus.emit(outcome)
+                    val outcome = app.di.imagePickPipeline.process(uri)
+                    app.di.captureOutcomeBus.emit(outcome)
                 } finally {
                     processingCount--
                 }
@@ -103,7 +98,7 @@ fun YankNavGraph() {
     }
 
     val notesVm: NotesViewModel = viewModel(factory = viewModelFactory {
-        initializer { NotesViewModel(ctx.di.historyRepo) }
+        initializer { NotesViewModel(app.di.historyRepo) }
     })
     var showNoteSheet by remember { mutableStateOf(false) }
 
@@ -154,7 +149,7 @@ fun YankNavGraph() {
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
-                modifier = Modifier.padding(bottom = 96.dp),
+                modifier = Modifier.padding(bottom = BottomNavReservedHeight),
             ) { Snackbar(it) }
         },
         containerColor = MaterialTheme.colorScheme.surface,
@@ -193,28 +188,5 @@ fun YankNavGraph() {
             onDismiss = { showNoteSheet = false },
             onSave = notesVm::saveManualNote,
         )
-    }
-}
-
-@Composable
-private fun ProcessingCard() {
-    ElevatedCard(modifier = Modifier.padding(horizontal = 24.dp)) {
-        Row(
-            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.Start,
-        ) {
-            CircularProgressIndicator(
-                modifier = Modifier.size(20.dp),
-                strokeWidth = 2.5.dp,
-                color = MaterialTheme.colorScheme.primary,
-            )
-            Spacer(Modifier.width(14.dp))
-            Text(
-                text = stringResource(R.string.recognize_in_flight),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurface,
-            )
-        }
     }
 }

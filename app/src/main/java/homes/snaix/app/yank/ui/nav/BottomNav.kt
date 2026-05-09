@@ -28,6 +28,13 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import homes.snaix.app.yank.R
 
+/**
+ * Vertical clearance to reserve at the bottom of any list-based screen so the
+ * floating pill (and any snackbar that sits above it) doesn't occlude the
+ * last items. Updated together with the pill height/padding constants below.
+ */
+val BottomNavReservedHeight = 96.dp
+
 enum class TopDest(val route: String, val labelRes: Int, val icon: ImageVector) {
     Records("records", R.string.tab_records, Icons.Outlined.History),
     Notes("notes", R.string.tab_notes, Icons.Outlined.Description),

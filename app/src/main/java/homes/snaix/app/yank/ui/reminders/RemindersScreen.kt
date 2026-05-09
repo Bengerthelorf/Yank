@@ -1,8 +1,5 @@
 package homes.snaix.app.yank.ui.reminders
 
-import android.content.ClipData
-import android.content.ClipboardManager
-import android.content.Context
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.height
@@ -25,22 +22,19 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
-import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.ui.common.EmptyState
+import homes.snaix.app.yank.ui.common.rememberCopyEntity
+import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 import homes.snaix.app.yank.ui.records.TypeCard
 
 @Composable
 fun RemindersScreen() {
-    val context = LocalContext.current
-    val ctx = context.applicationContext as YankApp
+    val app = LocalContext.current.applicationContext as YankApp
     val vm: RemindersViewModel = viewModel(factory = viewModelFactory {
-        initializer { RemindersViewModel(ctx.di.historyRepo) }
+        initializer { RemindersViewModel(app.di.historyRepo) }
     })
     val state by vm.state.collectAsState()
-    val onCopy: (HistoryEntity) -> Unit = { entity ->
-        val cm = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        cm.setPrimaryClip(ClipData.newPlainText("Yank", entity.displayPrimary))
-    }
+    val copy = rememberCopyEntity()
 
     if (state.active.isEmpty() && state.upcoming.isEmpty()) {
         EmptyState(
@@ -61,7 +55,7 @@ fun RemindersScreen() {
                 items(state.active, key = { it.id }) { e ->
                     TypeCard(
                         entity = e,
-                        onClick = { onCopy(e) },
+                        onClick = { copy(e) },
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     )
                 }
@@ -77,12 +71,12 @@ fun RemindersScreen() {
                 items(state.upcoming, key = { it.id }) { e ->
                     TypeCard(
                         entity = e,
-                        onClick = { onCopy(e) },
+                        onClick = { copy(e) },
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     )
                 }
             }
-            item { Spacer(Modifier.height(96.dp)) }
+            item { Spacer(Modifier.height(BottomNavReservedHeight)) }
         }
     }
 }

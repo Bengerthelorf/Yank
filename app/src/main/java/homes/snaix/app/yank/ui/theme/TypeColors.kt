@@ -9,6 +9,7 @@ import androidx.compose.ui.graphics.Color
 import com.materialkolor.dynamicColorScheme
 import com.materialkolor.PaletteStyle
 import com.materialkolor.hct.Hct
+import homes.snaix.app.yank.ui.records.RecordType
 
 @Immutable
 data class TypeColorRole(
@@ -27,7 +28,17 @@ data class TypeColors(
     val ticket: TypeColorRole,
     val todo: TypeColorRole,
     val notes: TypeColorRole,
-)
+) {
+    /** Resolve a [TypeColorRole] for a known [RecordType]. */
+    fun roleFor(type: RecordType): TypeColorRole = when (type) {
+        RecordType.Queue   -> queue
+        RecordType.Pickup  -> pickup
+        RecordType.Voucher -> voucher
+        RecordType.Express -> express
+        RecordType.Ticket  -> ticket
+        RecordType.Todo    -> todo
+    }
+}
 
 val LocalTypeColors = compositionLocalOf<TypeColors> { error("TypeColors not provided") }
 

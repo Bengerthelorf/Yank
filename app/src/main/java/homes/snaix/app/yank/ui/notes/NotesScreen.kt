@@ -26,6 +26,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.ui.common.EmptyState
+import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 
 @Composable
 fun NotesScreen() {
@@ -58,7 +59,7 @@ fun NotesScreen() {
                     }
                 }
             }
-            item { Spacer(Modifier.height(96.dp)) }
+            item { Spacer(Modifier.height(BottomNavReservedHeight)) }
         }
     }
 }

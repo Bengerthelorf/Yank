@@ -87,6 +87,10 @@
     <string name="recognize_in_flight">正在识别…</string>
     <string name="recognize_saved">已保存到记录</string>
 
+    <!-- Records empty states -->
+    <string name="empty_filter_title">该筛选下没有记录</string>
+    <string name="empty_filter_subtitle">再次点击当前筛选可取消，或选择其它类型。</string>
+
     <!-- Result bottom sheet -->
     <string name="result_recognize_failed">识别失败</string>
     <string name="result_parse_failure_message">模型返回内容无法解析为闭枚举 type。</string>

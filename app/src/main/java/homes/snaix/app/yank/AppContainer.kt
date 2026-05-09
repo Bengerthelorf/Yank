@@ -57,8 +57,13 @@ class AppContainer(private val ctx: Context) {
 
     val imagePickPipeline by lazy { ImagePickPipeline(ctx, capturePipeline) }
 
+    // replay = 1 so a subscriber that mounts after an emission (e.g. after a
+    // configuration change mid-recognition) still observes the most recent
+    // outcome and the success snackbar / failure sheet still fires. The
+    // trade-off is one possibly-stale outcome on subscriber startup, which is
+    // fine for our UI (idempotent snackbar / dismissable sheet).
     private val _outcomes = MutableSharedFlow<homes.snaix.app.yank.domain.capture.PipelineOutcome>(
-        replay = 0, extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST
+        replay = 1, extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST
     )
     val captureOutcomeBus: MutableSharedFlow<homes.snaix.app.yank.domain.capture.PipelineOutcome> = _outcomes
     val captureOutcomes: SharedFlow<homes.snaix.app.yank.domain.capture.PipelineOutcome> = _outcomes.asSharedFlow()

@@ -87,6 +87,10 @@
     <string name="recognize_in_flight">Recognizing…</string>
     <string name="recognize_saved">Saved to records</string>
 
+    <!-- Records empty states -->
+    <string name="empty_filter_title">No records for this filter</string>
+    <string name="empty_filter_subtitle">Tap the active chip again to clear it, or pick a different one.</string>
+
     <!-- Result bottom sheet -->
     <string name="result_recognize_failed">Recognition failed</string>
     <string name="result_parse_failure_message">Model response could not be parsed into the allowed type set.</string>
