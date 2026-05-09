@@ -18,6 +18,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.VerticalDivider
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
@@ -48,6 +49,7 @@ fun BottomNav(
         {
             VerticalDivider(
                 modifier = Modifier
+                    .align(Alignment.CenterVertically)
                     .height(32.dp)
                     .padding(horizontal = 4.dp),
                 thickness = 1.dp,

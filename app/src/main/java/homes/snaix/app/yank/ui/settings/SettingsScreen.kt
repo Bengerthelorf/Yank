@@ -142,12 +142,14 @@ fun SettingsScreen() {
                         },
                     )
                 }
-                if (currentProvider == null) {
-                    DropdownMenuItem(
-                        text = { Text("自定义") },
-                        onClick = { providerDropdownExpanded = false },
-                    )
-                }
+                DropdownMenuItem(
+                    text = { Text("自定义") },
+                    onClick = {
+                        currentProvider = null
+                        advancedExpanded = true
+                        providerDropdownExpanded = false
+                    },
+                )
             }
         }
 
@@ -267,14 +269,21 @@ fun SettingsScreen() {
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
+
+                Spacer(Modifier.height(20.dp))
+
+                Text("Prompt", style = MaterialTheme.typography.titleMedium)
+                OutlinedTextField(
+                    value = prompt,
+                    onValueChange = { prompt = it; vm.setSystemPrompt(it) },
+                    label = { Text("System Prompt") },
+                    modifier = Modifier.fillMaxWidth().height(280.dp),
+                )
+                OutlinedButton(onClick = { vm.resetSystemPrompt(); prompt = Defaults.SYSTEM_PROMPT }) {
+                    Text(stringResource(R.string.action_restore_default))
+                }
             }
         }
-
-        HorizontalDivider(Modifier.padding(vertical = 24.dp))
-
-        Text("Prompt", style = MaterialTheme.typography.titleMedium)
-        OutlinedTextField(value = prompt, onValueChange = { prompt = it; vm.setSystemPrompt(it) }, label = { Text("System Prompt") }, modifier = Modifier.fillMaxWidth().height(280.dp))
-        OutlinedButton(onClick = { vm.resetSystemPrompt(); prompt = Defaults.SYSTEM_PROMPT }) { Text(stringResource(R.string.action_restore_default)) }
 
         HorizontalDivider(Modifier.padding(vertical = 24.dp))
 
