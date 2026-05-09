@@ -1,19 +1,22 @@
 package homes.snaix.app.yank.ui.nav
 
+import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Description
 import androidx.compose.material.icons.outlined.History
 import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.material.icons.outlined.Settings
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
+import androidx.compose.material3.FilledIconButton
+import androidx.compose.material3.HorizontalFloatingToolbar
 import androidx.compose.material3.Icon
-import androidx.compose.material3.ShortNavigationBar
-import androidx.compose.material3.ShortNavigationBarItem
-import androidx.compose.material3.Text
+import androidx.compose.material3.IconButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
-import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.unit.dp
 import androidx.navigation.NavDestination.Companion.hierarchy
 import androidx.navigation.NavGraph.Companion.findStartDestination
 import androidx.navigation.NavHostController
@@ -29,23 +32,37 @@ enum class TopDest(val route: String, val labelRes: Int, val icon: ImageVector) 
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class)
 @Composable
-fun BottomNav(navController: NavHostController) {
+fun BottomNav(navController: NavHostController, modifier: Modifier = Modifier) {
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination
-    ShortNavigationBar {
+    HorizontalFloatingToolbar(
+        expanded = true,
+        modifier = modifier,
+    ) {
         TopDest.entries.forEach { dest ->
-            ShortNavigationBarItem(
-                selected = current?.hierarchy?.any { it.route == dest.route } == true,
-                onClick = {
-                    navController.navigate(dest.route) {
-                        popUpTo(navController.graph.findStartDestination().id) { saveState = true }
-                        launchSingleTop = true
-                        restoreState = true
-                    }
-                },
-                icon = { Icon(dest.icon, contentDescription = null) },
-                label = { Text(stringResource(dest.labelRes)) },
-            )
+            val selected = current?.hierarchy?.any { it.route == dest.route } == true
+            val onClick: () -> Unit = {
+                navController.navigate(dest.route) {
+                    popUpTo(navController.graph.findStartDestination().id) { saveState = true }
+                    launchSingleTop = true
+                    restoreState = true
+                }
+            }
+            if (selected) {
+                FilledIconButton(
+                    onClick = onClick,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(4.dp),
+                ) { Icon(dest.icon, contentDescription = null) }
+            } else {
+                IconButton(
+                    onClick = onClick,
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(4.dp),
+                ) { Icon(dest.icon, contentDescription = null) }
+            }
         }
     }
 }
