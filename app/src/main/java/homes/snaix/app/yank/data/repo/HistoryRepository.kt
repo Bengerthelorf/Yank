@@ -40,7 +40,7 @@ class HistoryRepository(
         date: String?,
         time: String?,
     ) {
-        val r = Recognition.Note(
+        val r: Recognition = Recognition.Note(
             title = title?.takeIf { it.isNotBlank() },
             body = body,
             date = date?.takeIf { it.isNotBlank() },
@@ -49,7 +49,7 @@ class HistoryRepository(
         upsert(entity.copy(
             displayPrimary = r.displayPrimary(),
             displaySecondary = r.displaySecondary(),
-            rawJson = RecognitionJson.encodeToString<Recognition>(r),
+            rawJson = RecognitionJson.encodeToString(r),
             rawText = r.rawTextBlob(),
         ))
     }

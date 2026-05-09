@@ -17,9 +17,8 @@ enum class SwipeAction(
     Pin(Icons.Outlined.PushPin, R.string.swipe_action_pin);
 
     companion object {
-        // Returns null on unknown key so a renamed enum or corrupted DataStore
-        // disables the swipe rather than crashing the screen on launch. The
-        // ConfigRepository default backstops fresh installs.
+        // Unknown key disables the swipe; renaming an entry must not crash
+        // existing installs whose DataStore still holds the old name.
         fun fromKey(key: String?): SwipeAction? = entries.firstOrNull { it.name == key }
     }
 }

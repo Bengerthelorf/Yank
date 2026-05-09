@@ -21,6 +21,9 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import homes.snaix.app.yank.R
+import homes.snaix.app.yank.data.db.HistoryEntity
+import homes.snaix.app.yank.domain.schema.Recognition
+import homes.snaix.app.yank.domain.schema.RecognitionJson
 
 data class NoteDraft(
     val title: String = "",
@@ -28,6 +31,39 @@ data class NoteDraft(
     val date: String = "",
     val time: String = "",
 )
+
+class NoteEditHost internal constructor(
+    val open: (HistoryEntity) -> Unit,
+    val Host: @Composable () -> Unit,
+)
+
+@Composable
+fun rememberNoteEditHost(
+    onSave: (HistoryEntity, title: String?, body: String, date: String?, time: String?) -> Unit,
+): NoteEditHost {
+    var target by remember { mutableStateOf<HistoryEntity?>(null) }
+    return NoteEditHost(
+        open = { target = it },
+        Host = {
+            target?.let { entity ->
+                val note = remember(entity.id) {
+                    RecognitionJson.decodeFromString<Recognition>(entity.rawJson) as Recognition.Note
+                }
+                ManualNoteSheet(
+                    onDismiss = { target = null },
+                    onSave = { title, body, date, time -> onSave(entity, title, body, date, time) },
+                    initial = NoteDraft(
+                        title = note.title.orEmpty(),
+                        body = note.body.orEmpty(),
+                        date = note.date.orEmpty(),
+                        time = note.time.orEmpty(),
+                    ),
+                    headerRes = R.string.note_edit,
+                )
+            }
+        },
+    )
+}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

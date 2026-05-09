@@ -19,8 +19,8 @@ fun rememberSwipeActions(
     onPin: (String) -> Unit,
 ): SwipeActionsBinding {
     val app = LocalContext.current.applicationContext as YankApp
-    val leftKey by app.di.configRepo.swipeLeftKey().collectAsState(initial = "Delete")
-    val rightKey by app.di.configRepo.swipeRightKey().collectAsState(initial = "Pin")
+    val leftKey by app.di.configRepo.swipeLeftKey().collectAsState(initial = SwipeAction.Delete.name)
+    val rightKey by app.di.configRepo.swipeRightKey().collectAsState(initial = SwipeAction.Pin.name)
     val left = SwipeAction.fromKey(leftKey)
     val right = SwipeAction.fromKey(rightKey)
     return SwipeActionsBinding(

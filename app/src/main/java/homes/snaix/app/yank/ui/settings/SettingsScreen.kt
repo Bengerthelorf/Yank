@@ -74,8 +74,8 @@ fun SettingsScreen() {
     var keepScreenshot by remember { mutableStateOf(Defaults.SCREENSHOT_RETENTION_DEFAULT) }
     var lockHide by remember { mutableStateOf(Defaults.LOCK_HIDE_DEFAULT) }
     var localeTag by remember { mutableStateOf("system") }
-    var swipeLeft by remember { mutableStateOf("Delete") }
-    var swipeRight by remember { mutableStateOf("Pin") }
+    var swipeLeft by remember { mutableStateOf(SwipeAction.Delete.name) }
+    var swipeRight by remember { mutableStateOf(SwipeAction.Pin.name) }
 
     var currentProvider by remember { mutableStateOf<VlmProvider?>(null) }
     var currentTier by remember { mutableStateOf(ModelTier.CAPABLE) }

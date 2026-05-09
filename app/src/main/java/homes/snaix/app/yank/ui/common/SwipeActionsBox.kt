@@ -42,23 +42,16 @@ fun SwipeActionsBox(
         state = state,
         enableDismissFromStartToEnd = rightAction != null,
         enableDismissFromEndToStart = leftAction != null,
-        backgroundContent = { SwipeBackground(state.dismissDirection, leftAction, rightAction) },
+        backgroundContent = {
+            when (state.dismissDirection) {
+                SwipeToDismissBoxValue.EndToStart -> leftAction?.let { ActionBackground(it, Arrangement.End) }
+                SwipeToDismissBoxValue.StartToEnd -> rightAction?.let { ActionBackground(it, Arrangement.Start) }
+                SwipeToDismissBoxValue.Settled -> Unit
+            }
+        },
         modifier = modifier,
     ) {
         content()
-    }
-}
-
-@Composable
-private fun SwipeBackground(
-    direction: SwipeToDismissBoxValue,
-    leftAction: SwipeAction?,
-    rightAction: SwipeAction?,
-) {
-    when (direction) {
-        SwipeToDismissBoxValue.EndToStart -> leftAction?.let { ActionBackground(it, Arrangement.End) }
-        SwipeToDismissBoxValue.StartToEnd -> rightAction?.let { ActionBackground(it, Arrangement.Start) }
-        SwipeToDismissBoxValue.Settled -> Unit
     }
 }
 
