@@ -7,9 +7,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.PushPin
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.SwipeToDismissBox
@@ -20,23 +17,22 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.unit.dp
 
 @Composable
 fun SwipeActionsBox(
-    onSwipeLeft: () -> Unit,
-    onSwipeRight: (() -> Unit)? = null,
+    leftAction: SwipeAction?,
+    rightAction: SwipeAction?,
+    onAction: (SwipeAction) -> Unit,
     modifier: Modifier = Modifier,
     content: @Composable () -> Unit,
 ) {
-    // confirmValueChange returns false in both directions: the box snaps back
-    // and the row removal (or no-op for repin) comes from the underlying Flow.
+    // Snap back; the row leaves via the underlying Flow when the action removes it.
     val state = rememberSwipeToDismissBoxState(
         confirmValueChange = { value ->
             when (value) {
-                SwipeToDismissBoxValue.EndToStart -> onSwipeLeft()
-                SwipeToDismissBoxValue.StartToEnd -> onSwipeRight?.invoke()
+                SwipeToDismissBoxValue.EndToStart -> leftAction?.let(onAction)
+                SwipeToDismissBoxValue.StartToEnd -> rightAction?.let(onAction)
                 SwipeToDismissBoxValue.Settled -> Unit
             }
             false
@@ -44,8 +40,9 @@ fun SwipeActionsBox(
     )
     SwipeToDismissBox(
         state = state,
-        enableDismissFromStartToEnd = onSwipeRight != null,
-        backgroundContent = { SwipeBackground(state.dismissDirection) },
+        enableDismissFromStartToEnd = rightAction != null,
+        enableDismissFromEndToStart = leftAction != null,
+        backgroundContent = { SwipeBackground(state.dismissDirection, leftAction, rightAction) },
         modifier = modifier,
     ) {
         content()
@@ -53,31 +50,21 @@ fun SwipeActionsBox(
 }
 
 @Composable
-private fun SwipeBackground(direction: SwipeToDismissBoxValue) {
+private fun SwipeBackground(
+    direction: SwipeToDismissBoxValue,
+    leftAction: SwipeAction?,
+    rightAction: SwipeAction?,
+) {
     when (direction) {
-        SwipeToDismissBoxValue.EndToStart -> ActionBackground(
-            icon = Icons.Outlined.DeleteOutline,
-            container = MaterialTheme.colorScheme.errorContainer,
-            tint = MaterialTheme.colorScheme.onErrorContainer,
-            alignment = Arrangement.End,
-        )
-        SwipeToDismissBoxValue.StartToEnd -> ActionBackground(
-            icon = Icons.Outlined.PushPin,
-            container = MaterialTheme.colorScheme.tertiaryContainer,
-            tint = MaterialTheme.colorScheme.onTertiaryContainer,
-            alignment = Arrangement.Start,
-        )
+        SwipeToDismissBoxValue.EndToStart -> leftAction?.let { ActionBackground(it, Arrangement.End) }
+        SwipeToDismissBoxValue.StartToEnd -> rightAction?.let { ActionBackground(it, Arrangement.Start) }
         SwipeToDismissBoxValue.Settled -> Unit
     }
 }
 
 @Composable
-private fun ActionBackground(
-    icon: ImageVector,
-    container: Color,
-    tint: Color,
-    alignment: Arrangement.Horizontal,
-) {
+private fun ActionBackground(action: SwipeAction, alignment: Arrangement.Horizontal) {
+    val (container, tint) = action.colors()
     Row(
         modifier = Modifier
             .fillMaxSize()
@@ -89,10 +76,17 @@ private fun ActionBackground(
         horizontalArrangement = alignment,
     ) {
         Icon(
-            imageVector = icon,
+            imageVector = action.icon,
             contentDescription = null,
             tint = tint,
             modifier = Modifier.size(24.dp),
         )
     }
+}
+
+@Composable
+private fun SwipeAction.colors(): Pair<Color, Color> = when (this) {
+    SwipeAction.Delete -> MaterialTheme.colorScheme.errorContainer to MaterialTheme.colorScheme.onErrorContainer
+    SwipeAction.Archive -> MaterialTheme.colorScheme.secondaryContainer to MaterialTheme.colorScheme.onSecondaryContainer
+    SwipeAction.Pin -> MaterialTheme.colorScheme.tertiaryContainer to MaterialTheme.colorScheme.onTertiaryContainer
 }

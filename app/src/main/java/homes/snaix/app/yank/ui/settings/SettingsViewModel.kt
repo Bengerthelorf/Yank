@@ -58,6 +58,8 @@ class SettingsViewModel(
 
     /** Persist the chosen UI locale and apply it. tag is "system" / "zh-CN" / "en". */
     fun setLocale(tag: String) { viewModelScope.launch { repo.setLocaleTag(tag) } }
+    fun setSwipeLeft(key: String) { viewModelScope.launch { repo.setSwipeLeftKey(key) } }
+    fun setSwipeRight(key: String) { viewModelScope.launch { repo.setSwipeRightKey(key) } }
 
     fun testConnection() {
         viewModelScope.launch {

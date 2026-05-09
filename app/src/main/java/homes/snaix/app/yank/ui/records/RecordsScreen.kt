@@ -23,9 +23,11 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.ui.common.EmptyState
+import homes.snaix.app.yank.ui.common.SwipeAction
 import homes.snaix.app.yank.ui.common.SwipeActionsBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
 import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
+import homes.snaix.app.yank.ui.common.rememberSwipeActions
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 
 @Composable
@@ -42,6 +44,11 @@ fun RecordsScreen(onOpenDetail: (String) -> Unit) {
         onCopy = copy,
         onDelete = { vm.delete(it.id) },
         onArchive = { vm.archive(it.id) },
+    )
+    val swipe = rememberSwipeActions(
+        onDelete = { id -> vm.delete(id) },
+        onArchive = { id -> vm.archive(id) },
+        onPin = { id -> vm.repin(id) },
     )
 
     if (!hasAnyData) {
@@ -66,8 +73,9 @@ fun RecordsScreen(onOpenDetail: (String) -> Unit) {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(items, key = { it.id }) { entity ->
                     SwipeActionsBox(
-                        onSwipeLeft = { vm.delete(entity.id) },
-                        onSwipeRight = { vm.repin(entity.id) },
+                        leftAction = swipe.leftAction,
+                        rightAction = swipe.rightAction,
+                        onAction = { swipe.dispatch(it, entity.id) },
                     ) {
                         TypeCard(
                             entity = entity,

@@ -68,6 +68,11 @@ class ConfigRepository(
         applyLocaleTag(context, tag)
     }
 
+    fun swipeLeftKey(): Flow<String> = store.stringFlow(Keys.SWIPE_LEFT, "Delete")
+    fun swipeRightKey(): Flow<String> = store.stringFlow(Keys.SWIPE_RIGHT, "Pin")
+    suspend fun setSwipeLeftKey(value: String) = store.setString(Keys.SWIPE_LEFT, value)
+    suspend fun setSwipeRightKey(value: String) = store.setString(Keys.SWIPE_RIGHT, value)
+
     companion object {
         /**
          * Apply the locale tag. On API 33+ uses the system [LocaleManager] (which is what

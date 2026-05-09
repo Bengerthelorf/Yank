@@ -21,6 +21,8 @@ class ConfigStore(private val context: Context) {
         val LOCK_HIDE = booleanPreferencesKey("lock_hide")
         val ARCHIVE_RETENTION_DAYS = intPreferencesKey("archive_retention_days")
         val LOCALE = stringPreferencesKey("locale")
+        val SWIPE_LEFT = stringPreferencesKey("swipe_left")
+        val SWIPE_RIGHT = stringPreferencesKey("swipe_right")
     }
 
     fun stringFlow(key: androidx.datastore.preferences.core.Preferences.Key<String>, default: String): Flow<String> =

@@ -26,6 +26,7 @@ import homes.snaix.app.yank.ui.common.EmptyState
 import homes.snaix.app.yank.ui.common.SwipeActionsBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
 import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
+import homes.snaix.app.yank.ui.common.rememberSwipeActions
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 import homes.snaix.app.yank.ui.records.TypeCard
 
@@ -41,6 +42,11 @@ fun RemindersScreen(onOpenDetail: (String) -> Unit) {
         onCopy = copy,
         onDelete = { vm.delete(it.id) },
         onArchive = { vm.archive(it.id) },
+    )
+    val swipe = rememberSwipeActions(
+        onDelete = { id -> vm.delete(id) },
+        onArchive = { id -> vm.archive(id) },
+        onPin = { id -> vm.repin(id) },
     )
 
     if (state.active.isEmpty() && state.upcoming.isEmpty()) {
@@ -61,8 +67,9 @@ fun RemindersScreen(onOpenDetail: (String) -> Unit) {
                 }
                 items(state.active, key = { it.id }) { e ->
                     SwipeActionsBox(
-                        onSwipeLeft = { vm.delete(e.id) },
-                        onSwipeRight = { vm.repin(e.id) },
+                        leftAction = swipe.leftAction,
+                        rightAction = swipe.rightAction,
+                        onAction = { swipe.dispatch(it, e.id) },
                     ) {
                         TypeCard(
                             entity = e,
@@ -83,8 +90,9 @@ fun RemindersScreen(onOpenDetail: (String) -> Unit) {
                 }
                 items(state.upcoming, key = { it.id }) { e ->
                     SwipeActionsBox(
-                        onSwipeLeft = { vm.delete(e.id) },
-                        onSwipeRight = { vm.repin(e.id) },
+                        leftAction = swipe.leftAction,
+                        rightAction = swipe.rightAction,
+                        onAction = { swipe.dispatch(it, e.id) },
                     ) {
                         TypeCard(
                             entity = e,

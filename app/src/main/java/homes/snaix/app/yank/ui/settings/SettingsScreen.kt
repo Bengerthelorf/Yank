@@ -54,6 +54,7 @@ import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.domain.vlm.ModelTier
 import homes.snaix.app.yank.domain.vlm.VlmProvider
+import homes.snaix.app.yank.ui.common.SwipeAction
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 import kotlinx.coroutines.flow.first
 
@@ -73,6 +74,8 @@ fun SettingsScreen() {
     var keepScreenshot by remember { mutableStateOf(Defaults.SCREENSHOT_RETENTION_DEFAULT) }
     var lockHide by remember { mutableStateOf(Defaults.LOCK_HIDE_DEFAULT) }
     var localeTag by remember { mutableStateOf("system") }
+    var swipeLeft by remember { mutableStateOf("Delete") }
+    var swipeRight by remember { mutableStateOf("Pin") }
 
     var currentProvider by remember { mutableStateOf<VlmProvider?>(null) }
     var currentTier by remember { mutableStateOf(ModelTier.CAPABLE) }
@@ -88,6 +91,8 @@ fun SettingsScreen() {
         keepScreenshot = app.di.configRepo.screenshotRetention().first()
         lockHide = app.di.configRepo.lockHide().first()
         localeTag = app.di.configRepo.localeTag().first()
+        swipeLeft = app.di.configRepo.swipeLeftKey().first()
+        swipeRight = app.di.configRepo.swipeRightKey().first()
 
         // Derive provider/tier from current baseUrl + model
         val matched = VlmProvider.fromBaseUrl(snap.baseUrl)
@@ -353,6 +358,52 @@ fun SettingsScreen() {
             }
         }
 
+        HorizontalDivider(Modifier.padding(vertical = 16.dp))
+
+        Text(
+            stringResource(R.string.section_swipe),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+        Text(
+            stringResource(R.string.settings_swipe_hint),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+        SwipeDirectionRow(
+            label = stringResource(R.string.settings_swipe_left),
+            selected = swipeLeft,
+            onSelect = { swipeLeft = it; vm.setSwipeLeft(it) },
+        )
+        Spacer(Modifier.height(8.dp))
+        SwipeDirectionRow(
+            label = stringResource(R.string.settings_swipe_right),
+            selected = swipeRight,
+            onSelect = { swipeRight = it; vm.setSwipeRight(it) },
+        )
+
         Spacer(Modifier.height(BottomNavReservedHeight))
+    }
+}
+
+@OptIn(ExperimentalMaterial3Api::class)
+@Composable
+private fun SwipeDirectionRow(
+    label: String,
+    selected: String,
+    onSelect: (String) -> Unit,
+) {
+    Text(label, style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(bottom = 4.dp))
+    SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+        SwipeAction.entries.forEachIndexed { index, action ->
+            SegmentedButton(
+                selected = selected == action.name,
+                onClick = { onSelect(action.name) },
+                shape = SegmentedButtonDefaults.itemShape(index, SwipeAction.entries.size),
+            ) {
+                Text(stringResource(action.labelRes))
+            }
+        }
     }
 }

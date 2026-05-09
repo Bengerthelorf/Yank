@@ -99,6 +99,15 @@
     <string name="detail_missing_title">记录已不存在</string>
     <string name="detail_missing_subtitle">可能在你离开时已被删除。</string>
 
+    <!-- Swipe actions -->
+    <string name="swipe_action_delete">删除</string>
+    <string name="swipe_action_archive">归档</string>
+    <string name="swipe_action_pin">置顶通知</string>
+    <string name="section_swipe">滑动手势</string>
+    <string name="settings_swipe_left">左滑</string>
+    <string name="settings_swipe_right">右滑</string>
+    <string name="settings_swipe_hint">应用于记录和提醒。笔记始终左滑删除。</string>
+
     <!-- Records empty states -->
     <string name="empty_filter_title">该筛选下没有记录</string>
     <string name="empty_filter_subtitle">再次点击当前筛选可取消，或选择其它类型。</string>

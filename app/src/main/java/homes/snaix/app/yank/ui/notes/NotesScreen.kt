@@ -29,6 +29,7 @@ import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.ui.common.EmptyState
+import homes.snaix.app.yank.ui.common.SwipeAction
 import homes.snaix.app.yank.ui.common.SwipeActionsBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
 import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
@@ -56,7 +57,11 @@ fun NotesScreen(onOpenDetail: (String) -> Unit) {
     } else {
         LazyColumn(modifier = Modifier.fillMaxSize()) {
             items(items, key = { it.id }) { e ->
-                SwipeActionsBox(onSwipeLeft = { vm.delete(e.id) }) {
+                SwipeActionsBox(
+                    leftAction = SwipeAction.Delete,
+                    rightAction = null,
+                    onAction = { vm.delete(e.id) },
+                ) {
                     NoteCard(
                         entity = e,
                         onClick = { onOpenDetail(e.id) },

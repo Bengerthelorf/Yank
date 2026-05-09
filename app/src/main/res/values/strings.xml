@@ -99,6 +99,15 @@
     <string name="detail_missing_title">Record not found</string>
     <string name="detail_missing_subtitle">It may have been deleted while you were elsewhere.</string>
 
+    <!-- Swipe actions -->
+    <string name="swipe_action_delete">Delete</string>
+    <string name="swipe_action_archive">Archive</string>
+    <string name="swipe_action_pin">Pin</string>
+    <string name="section_swipe">Swipe gestures</string>
+    <string name="settings_swipe_left">Swipe left</string>
+    <string name="settings_swipe_right">Swipe right</string>
+    <string name="settings_swipe_hint">Applies to records and reminders. Notes always swipe-left to delete.</string>
+
     <!-- Records empty states -->
     <string name="empty_filter_title">No records for this filter</string>
     <string name="empty_filter_subtitle">Tap the active chip again to clear it, or pick a different one.</string>
