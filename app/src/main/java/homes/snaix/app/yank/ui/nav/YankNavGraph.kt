@@ -14,6 +14,7 @@ import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
@@ -86,9 +87,13 @@ fun YankNavGraph() {
                 FilledIconButton(
                     onClick = { pickImage.launch("image/*") },
                     modifier = Modifier
-                        .size(56.dp)
+                        .size(60.dp)
                         .padding(4.dp),
                     shape = MaterialShapes.Cookie9Sided.toShape(),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                    ),
                 ) { Icon(Icons.Outlined.PhotoCamera, contentDescription = "选图识别") }
             }
         }
@@ -97,9 +102,13 @@ fun YankNavGraph() {
                 FilledIconButton(
                     onClick = { showNoteSheet = true },
                     modifier = Modifier
-                        .size(56.dp)
+                        .size(60.dp)
                         .padding(4.dp),
                     shape = MaterialShapes.Cookie9Sided.toShape(),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                    ),
                 ) { Icon(Icons.Outlined.Edit, contentDescription = "新建笔记") }
             }
         }
