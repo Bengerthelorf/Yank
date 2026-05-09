@@ -10,9 +10,12 @@ import androidx.core.graphics.drawable.IconCompat
 import androidx.work.ExistingPeriodicWorkPolicy
 import androidx.work.PeriodicWorkRequestBuilder
 import androidx.work.WorkManager
+import homes.snaix.app.yank.data.repo.ConfigRepository
 import homes.snaix.app.yank.domain.pin.ChannelIds
 import homes.snaix.app.yank.domain.pin.HistoryRetentionWorker
 import homes.snaix.app.yank.trigger.CaptureActivity
+import kotlinx.coroutines.flow.first
+import kotlinx.coroutines.runBlocking
 import java.util.concurrent.TimeUnit
 
 class YankApp : Application() {
@@ -22,9 +25,19 @@ class YankApp : Application() {
     override fun onCreate() {
         super.onCreate()
         di = AppContainer(this)
+        applyPersistedLocale()
         ensureChannels()
         scheduleRetention()
         registerCaptureShortcut()
+    }
+
+    /**
+     * Reads the persisted locale tag synchronously and applies it via AppCompatDelegate.
+     * The DataStore read is one-shot at cold start so runBlocking is acceptable here.
+     */
+    private fun applyPersistedLocale() {
+        val tag = runBlocking { di.configRepo.localeTag().first() }
+        ConfigRepository.applyLocaleTag(this, tag)
     }
 
     private fun ensureChannels() {
@@ -33,11 +46,11 @@ class YankApp : Application() {
             ChannelIds.SERVICE, "Yank Service", NotificationManager.IMPORTANCE_LOW
         ).apply { description = "FG service" })
         nm.createNotificationChannel(NotificationChannel(
-            ChannelIds.PIN, "钉住的信息", NotificationManager.IMPORTANCE_HIGH
-        ).apply { description = "识别后的常驻通知" })
+            ChannelIds.PIN, getString(R.string.channel_pin_name), NotificationManager.IMPORTANCE_HIGH
+        ).apply { description = getString(R.string.channel_pin_desc) })
         nm.createNotificationChannel(NotificationChannel(
-            ChannelIds.ERROR, "错误", NotificationManager.IMPORTANCE_DEFAULT
-        ).apply { description = "解析失败 / 网络错误" })
+            ChannelIds.ERROR, getString(R.string.channel_error_name), NotificationManager.IMPORTANCE_DEFAULT
+        ).apply { description = getString(R.string.channel_error_desc) })
     }
 
     private fun scheduleRetention() {

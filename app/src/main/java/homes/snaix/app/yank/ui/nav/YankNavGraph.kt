@@ -94,7 +94,7 @@ fun YankNavGraph() {
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
                     ),
-                ) { Icon(Icons.Outlined.PhotoCamera, contentDescription = "选图识别") }
+                ) { Icon(Icons.Outlined.PhotoCamera, contentDescription = stringResource(R.string.action_pick_image)) }
             }
         }
         TopDest.Notes.route -> {
@@ -109,7 +109,7 @@ fun YankNavGraph() {
                         containerColor = MaterialTheme.colorScheme.tertiary,
                         contentColor = MaterialTheme.colorScheme.onTertiary,
                     ),
-                ) { Icon(Icons.Outlined.Edit, contentDescription = "新建笔记") }
+                ) { Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.action_new_note)) }
             }
         }
         else -> null

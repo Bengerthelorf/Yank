@@ -12,7 +12,7 @@ class YankTileService : TileService() {
         super.onStartListening()
         qsTile?.apply {
             state = Tile.STATE_ACTIVE
-            label = "上岛识别"
+            label = getString(homes.snaix.app.yank.R.string.qs_tile_label)
             updateTile()
         }
     }

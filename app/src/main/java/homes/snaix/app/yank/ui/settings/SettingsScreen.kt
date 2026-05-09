@@ -71,6 +71,7 @@ fun SettingsScreen() {
     var prompt by remember { mutableStateOf("") }
     var keepScreenshot by remember { mutableStateOf(Defaults.SCREENSHOT_RETENTION_DEFAULT) }
     var lockHide by remember { mutableStateOf(Defaults.LOCK_HIDE_DEFAULT) }
+    var localeTag by remember { mutableStateOf("system") }
 
     var currentProvider by remember { mutableStateOf<VlmProvider?>(null) }
     var currentTier by remember { mutableStateOf(ModelTier.CAPABLE) }
@@ -85,6 +86,7 @@ fun SettingsScreen() {
         prompt = snap.systemPrompt
         keepScreenshot = ctx.di.configRepo.screenshotRetention().first()
         lockHide = ctx.di.configRepo.lockHide().first()
+        localeTag = ctx.di.configRepo.localeTag().first()
 
         // Derive provider/tier from current baseUrl + model
         val matched = VlmProvider.fromBaseUrl(snap.baseUrl)
@@ -98,16 +100,26 @@ fun SettingsScreen() {
         if (matched == null) advancedExpanded = true
     }
 
+    val customLabel = stringResource(R.string.settings_provider_custom)
+
     Column(
         Modifier
             .verticalScroll(rememberScrollState())
             .padding(16.dp),
     ) {
-        Text("API", style = MaterialTheme.typography.titleMedium, modifier = Modifier.padding(vertical = 8.dp))
+        Text(
+            stringResource(R.string.section_api),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(vertical = 8.dp),
+        )
 
         // Provider dropdown
-        Text("Provider", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(top = 4.dp, bottom = 4.dp))
-        val providerLabel = currentProvider?.displayName ?: "自定义"
+        Text(
+            stringResource(R.string.settings_provider),
+            style = MaterialTheme.typography.labelLarge,
+            modifier = Modifier.padding(top = 4.dp, bottom = 4.dp),
+        )
+        val providerLabel = currentProvider?.displayName ?: customLabel
         ExposedDropdownMenuBox(
             expanded = providerDropdownExpanded,
             onExpandedChange = { providerDropdownExpanded = it },
@@ -116,7 +128,7 @@ fun SettingsScreen() {
                 value = providerLabel,
                 onValueChange = {},
                 readOnly = true,
-                label = { Text("Provider") },
+                label = { Text(stringResource(R.string.settings_provider)) },
                 trailingIcon = { ExposedDropdownMenuDefaults.TrailingIcon(expanded = providerDropdownExpanded) },
                 modifier = Modifier
                     .menuAnchor(ExposedDropdownMenuAnchorType.PrimaryNotEditable)
@@ -143,7 +155,7 @@ fun SettingsScreen() {
                     )
                 }
                 DropdownMenuItem(
-                    text = { Text("自定义") },
+                    text = { Text(customLabel) },
                     onClick = {
                         currentProvider = null
                         advancedExpanded = true
@@ -159,7 +171,11 @@ fun SettingsScreen() {
         AnimatedVisibility(visible = currentProvider != null) {
             val provider = currentProvider
             Column {
-                Text("Model tier", style = MaterialTheme.typography.labelLarge, modifier = Modifier.padding(bottom = 4.dp))
+                Text(
+                    stringResource(R.string.settings_model_tier),
+                    style = MaterialTheme.typography.labelLarge,
+                    modifier = Modifier.padding(bottom = 4.dp),
+                )
                 SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                     val tiers = listOf(ModelTier.FAST, ModelTier.CAPABLE)
                     tiers.forEachIndexed { index, tier ->
@@ -177,7 +193,10 @@ fun SettingsScreen() {
                             },
                             shape = SegmentedButtonDefaults.itemShape(index = index, count = tiers.size),
                         ) {
-                            Text(if (tier == ModelTier.FAST) "快" else "准")
+                            Text(
+                                if (tier == ModelTier.FAST) stringResource(R.string.settings_tier_fast)
+                                else stringResource(R.string.settings_tier_capable)
+                            )
                         }
                     }
                 }
@@ -186,7 +205,9 @@ fun SettingsScreen() {
                         ModelTier.FAST -> provider.fastModel
                         ModelTier.CAPABLE -> provider.capableModel
                     }
-                    val tierTag = if (currentTier == ModelTier.FAST) "快" else "准"
+                    val tierTag =
+                        if (currentTier == ModelTier.FAST) stringResource(R.string.settings_tier_fast)
+                        else stringResource(R.string.settings_tier_capable)
                     Text(
                         "$tierTag: $resolvedModel",
                         style = MaterialTheme.typography.bodySmall,
@@ -202,7 +223,7 @@ fun SettingsScreen() {
         OutlinedTextField(
             value = apiKey,
             onValueChange = { apiKey = it; vm.setApiKey(it) },
-            label = { Text("API Key") },
+            label = { Text(stringResource(R.string.settings_api_key)) },
             visualTransformation = PasswordVisualTransformation(),
             modifier = Modifier.fillMaxWidth(),
         )
@@ -217,10 +238,16 @@ fun SettingsScreen() {
                 modifier = Modifier.padding(top = 8.dp),
             ) {
                 LoadingIndicator()
-                Text("测试中…")
+                Text(stringResource(R.string.test_running))
             }
-            TestResult.Ok -> Text("连接正常 ✓", modifier = Modifier.padding(top = 8.dp))
-            is TestResult.Failed -> Text("失败：${s.message}", modifier = Modifier.padding(top = 8.dp))
+            TestResult.Ok -> Text(
+                stringResource(R.string.test_ok),
+                modifier = Modifier.padding(top = 8.dp),
+            )
+            is TestResult.Failed -> Text(
+                stringResource(R.string.test_failed, s.message),
+                modifier = Modifier.padding(top = 8.dp),
+            )
         }
 
         Spacer(Modifier.height(16.dp))
@@ -232,7 +259,7 @@ fun SettingsScreen() {
                 contentDescription = null,
             )
             Spacer(Modifier.height(0.dp))
-            Text(" 高级 / Advanced")
+            Text(" " + stringResource(R.string.settings_advanced))
         }
 
         AnimatedVisibility(visible = advancedExpanded) {
@@ -245,7 +272,7 @@ fun SettingsScreen() {
                         // Re-derive provider; if doesn't match any preset, drop tier UI
                         currentProvider = VlmProvider.fromBaseUrl(v)
                     },
-                    label = { Text("Base URL") },
+                    label = { Text(stringResource(R.string.settings_base_url)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(8.dp))
@@ -260,23 +287,23 @@ fun SettingsScreen() {
                             currentProvider = null
                         }
                     },
-                    label = { Text("Model") },
+                    label = { Text(stringResource(R.string.settings_model)) },
                     modifier = Modifier.fillMaxWidth(),
                 )
                 Spacer(Modifier.height(4.dp))
                 Text(
-                    "直接编辑会切换到「自定义」",
+                    stringResource(R.string.settings_model_edit_hint),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                 )
 
                 Spacer(Modifier.height(20.dp))
 
-                Text("Prompt", style = MaterialTheme.typography.titleMedium)
+                Text(stringResource(R.string.section_prompt), style = MaterialTheme.typography.titleMedium)
                 OutlinedTextField(
                     value = prompt,
                     onValueChange = { prompt = it; vm.setSystemPrompt(it) },
-                    label = { Text("System Prompt") },
+                    label = { Text(stringResource(R.string.settings_system_prompt)) },
                     modifier = Modifier.fillMaxWidth().height(280.dp),
                 )
                 OutlinedButton(onClick = { vm.resetSystemPrompt(); prompt = Defaults.SYSTEM_PROMPT }) {
@@ -287,15 +314,44 @@ fun SettingsScreen() {
 
         HorizontalDivider(Modifier.padding(vertical = 24.dp))
 
-        Text("行为", style = MaterialTheme.typography.titleMedium)
+        Text(stringResource(R.string.section_behavior), style = MaterialTheme.typography.titleMedium)
         ListItem(
-            headlineContent = { Text("截图保留") },
+            headlineContent = { Text(stringResource(R.string.settings_keep_screenshot)) },
             trailingContent = { Switch(checked = keepScreenshot, onCheckedChange = { keepScreenshot = it; vm.setScreenshotRetention(it) }) },
         )
         ListItem(
-            headlineContent = { Text("锁屏隐藏敏感信息") },
+            headlineContent = { Text(stringResource(R.string.settings_lock_hide)) },
             trailingContent = { Switch(checked = lockHide, onCheckedChange = { lockHide = it; vm.setLockHide(it) }) },
         )
+
+        HorizontalDivider(Modifier.padding(vertical = 16.dp))
+
+        // Language section
+        Text(
+            stringResource(R.string.section_language),
+            style = MaterialTheme.typography.titleMedium,
+            modifier = Modifier.padding(bottom = 8.dp),
+        )
+        SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
+            val options = listOf(
+                "system" to stringResource(R.string.lang_system),
+                "zh-CN" to stringResource(R.string.lang_zh),
+                "en" to stringResource(R.string.lang_en),
+            )
+            options.forEachIndexed { index, (tag, label) ->
+                SegmentedButton(
+                    selected = localeTag == tag,
+                    onClick = {
+                        localeTag = tag
+                        vm.setLocale(tag)
+                    },
+                    shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size),
+                ) {
+                    Text(label)
+                }
+            }
+        }
+
         Spacer(Modifier.height(96.dp))
     }
 }

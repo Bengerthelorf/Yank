@@ -20,7 +20,9 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.domain.capture.PipelineOutcome
 
@@ -45,21 +47,21 @@ fun ResultBottomSheetHost() {
 
     ModalBottomSheet(onDismissRequest = { current = null }, sheetState = state) {
         Column(Modifier.padding(24.dp)) {
-            Text("识别失败", style = MaterialTheme.typography.titleMedium)
+            Text(stringResource(R.string.result_recognize_failed), style = MaterialTheme.typography.titleMedium)
             when (outcome) {
                 is PipelineOutcome.ParseFailure -> {
-                    Text("模型返回内容无法解析为闭枚举 type。", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
+                    Text(stringResource(R.string.result_parse_failure_message), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
                     Text(outcome.raw.take(800), style = MaterialTheme.typography.labelSmall, color = MaterialTheme.colorScheme.onSurfaceVariant, modifier = Modifier.padding(top = 8.dp))
                     Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.End) {
-                        TextButton(onClick = { current = null }) { Text("丢弃") }
-                        TextButton(onClick = { current = null }) { Text("存为 notes") }
-                        Button(onClick = { current = null }) { Text("重试") }
+                        TextButton(onClick = { current = null }) { Text(stringResource(R.string.action_discard)) }
+                        TextButton(onClick = { current = null }) { Text(stringResource(R.string.action_save_as_notes)) }
+                        Button(onClick = { current = null }) { Text(stringResource(R.string.action_retry)) }
                     }
                 }
                 is PipelineOutcome.TransportFailure -> {
-                    Text("网络/调用失败：${outcome.error}", style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
+                    Text(stringResource(R.string.result_transport_failure_message, outcome.error.toString()), style = MaterialTheme.typography.bodyMedium, modifier = Modifier.padding(top = 8.dp))
                     Row(Modifier.fillMaxWidth().padding(top = 16.dp), horizontalArrangement = Arrangement.End) {
-                        Button(onClick = { current = null }) { Text("好的") }
+                        Button(onClick = { current = null }) { Text(stringResource(R.string.action_ok)) }
                     }
                 }
                 else -> Unit

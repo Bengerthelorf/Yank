@@ -28,7 +28,7 @@ class CaptureActivity : ComponentActivity() {
             MediaProjectionHolder.set(pm, result.resultCode, result.data!!)
             triggerCapture()
         } else {
-            Toast.makeText(this, "未授予录屏权限", Toast.LENGTH_SHORT).show()
+            Toast.makeText(this, R.string.capture_projection_denied, Toast.LENGTH_SHORT).show()
         }
         finish()
     }

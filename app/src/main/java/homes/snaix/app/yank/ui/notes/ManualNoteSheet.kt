@@ -18,7 +18,9 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import homes.snaix.app.yank.R
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -34,19 +36,19 @@ fun ManualNoteSheet(
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = state) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text("新建笔记")
-            OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text("标题（可选）") }, modifier = Modifier.fillMaxWidth())
-            OutlinedTextField(value = body, onValueChange = { body = it }, label = { Text("正文") }, modifier = Modifier.fillMaxWidth(), minLines = 3)
+            Text(stringResource(R.string.note_new))
+            OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text(stringResource(R.string.note_title_optional)) }, modifier = Modifier.fillMaxWidth())
+            OutlinedTextField(value = body, onValueChange = { body = it }, label = { Text(stringResource(R.string.note_body)) }, modifier = Modifier.fillMaxWidth(), minLines = 3)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {
-                OutlinedTextField(value = date, onValueChange = { date = it }, label = { Text("日期 (YYYY-MM-DD)") }, modifier = Modifier.weight(1f))
-                OutlinedTextField(value = time, onValueChange = { time = it }, label = { Text("时间 (HH:MM)") }, modifier = Modifier.weight(1f))
+                OutlinedTextField(value = date, onValueChange = { date = it }, label = { Text(stringResource(R.string.note_date_label)) }, modifier = Modifier.weight(1f))
+                OutlinedTextField(value = time, onValueChange = { time = it }, label = { Text(stringResource(R.string.note_time_label)) }, modifier = Modifier.weight(1f))
             }
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp), modifier = Modifier.fillMaxWidth()) {
-                TextButton(onClick = onDismiss) { Text("取消") }
+                TextButton(onClick = onDismiss) { Text(stringResource(R.string.action_cancel)) }
                 Button(onClick = {
                     onSave(title.ifBlank { null }, body, date.ifBlank { null }, time.ifBlank { null })
                     onDismiss()
-                }, enabled = body.isNotBlank()) { Text("保存") }
+                }, enabled = body.isNotBlank()) { Text(stringResource(R.string.action_save)) }
             }
         }
     }

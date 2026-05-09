@@ -29,7 +29,7 @@ class AppContainer(private val ctx: Context) {
     }
     val configStore by lazy { ConfigStore(ctx) }
     val keyStore by lazy { EncryptedKeyStore(ctx) }
-    val configRepo by lazy { ConfigRepository(configStore, keyStore) }
+    val configRepo by lazy { ConfigRepository(ctx, configStore, keyStore) }
     val historyRepo by lazy { HistoryRepository(database.historyDao(), database.dedupDao()) }
 
     val zxing by lazy { ZxingDecoder() }

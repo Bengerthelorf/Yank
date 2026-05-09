@@ -3,6 +3,7 @@ package homes.snaix.app.yank.ui.settings
 import android.content.Context
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
+import homes.snaix.app.yank.R
 import homes.snaix.app.yank.data.repo.ConfigRepository
 import homes.snaix.app.yank.domain.schema.type
 import homes.snaix.app.yank.domain.vlm.ModelTier
@@ -55,13 +56,16 @@ class SettingsViewModel(
     fun setLockHide(b: Boolean) { viewModelScope.launch { repo.setLockHide(b) } }
     fun setArchiveRetentionDays(d: Int) { viewModelScope.launch { repo.setArchiveRetentionDays(d) } }
 
+    /** Persist the chosen UI locale and apply it. tag is "system" / "zh-CN" / "en". */
+    fun setLocale(tag: String) { viewModelScope.launch { repo.setLocaleTag(tag) } }
+
     fun testConnection() {
         viewModelScope.launch {
             _testState.value = TestResult.Running
             val snap = repo.observeVlmConfig().first()
             val key = snap.apiKey
             if (key.isNullOrBlank()) {
-                _testState.value = TestResult.Failed("未填 API key")
+                _testState.value = TestResult.Failed(ctx.getString(R.string.test_error_no_key))
                 return@launch
             }
             val bytes = ctx.assets.open("test_screenshot.png").use { it.readBytes() }
@@ -69,8 +73,10 @@ class SettingsViewModel(
             val res = vlm.recognize(cfg, bytes, emptyList())
             _testState.value = res.fold(
                 onSuccess = { items ->
+                    // The 7 enum values are the JSON discriminator contract — they remain in Chinese
+                    // regardless of UI language because they're what the model returns.
                     val ok = items.isNotEmpty() && items.first().type in setOf("排队","取餐","券码","快递","票券","待办","notes")
-                    if (ok) TestResult.Ok else TestResult.Failed("返回非闭枚举 type")
+                    if (ok) TestResult.Ok else TestResult.Failed(ctx.getString(R.string.test_error_bad_type))
                 },
                 onFailure = { e -> TestResult.Failed((e as? VlmException)?.error?.toString() ?: e.message ?: "unknown") }
             )

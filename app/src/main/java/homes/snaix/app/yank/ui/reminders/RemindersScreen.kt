@@ -44,7 +44,7 @@ fun RemindersScreen() {
             if (state.active.isNotEmpty()) {
                 item {
                     Text(
-                        "进行中",
+                        stringResource(R.string.reminders_active),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(16.dp),
                     )
@@ -60,7 +60,7 @@ fun RemindersScreen() {
             if (state.upcoming.isNotEmpty()) {
                 item {
                     Text(
-                        "即将开始",
+                        stringResource(R.string.reminders_upcoming),
                         style = MaterialTheme.typography.titleMedium,
                         modifier = Modifier.padding(16.dp),
                     )

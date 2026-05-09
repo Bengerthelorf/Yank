@@ -71,8 +71,8 @@ class CaptureService : Service() {
     private fun startForegroundCompat() {
         val notification: Notification = NotificationCompat.Builder(this, ChannelIds.SERVICE)
             .setSmallIcon(R.drawable.ic_yank_tile)
-            .setContentTitle("Yank ready")
-            .setContentText("点手势 / 控制中心磁贴 即可识别")
+            .setContentTitle(getString(R.string.fg_ready_title))
+            .setContentText(getString(R.string.fg_ready_text))
             .setOngoing(true)
             .setPriority(NotificationCompat.PRIORITY_LOW)
             .build()
