@@ -115,6 +115,36 @@ fun YankNavGraph() {
 
     val openDetail: (String) -> Unit = { id -> nav.navigate(detailRouteFor(id)) }
 
+    val trailingFab: (@Composable RowScope.() -> Unit)? = when (currentRoute) {
+        TopDest.Records.route -> {
+            {
+                FilledIconButton(
+                    onClick = { pickImage.launch("image/*") },
+                    modifier = Modifier.size(60.dp).padding(4.dp),
+                    shape = MaterialShapes.Cookie9Sided.toShape(),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                    ),
+                ) { Icon(Icons.Outlined.PhotoCamera, contentDescription = stringResource(R.string.action_pick_image)) }
+            }
+        }
+        TopDest.Notes.route -> {
+            {
+                FilledIconButton(
+                    onClick = { showNoteSheet = true },
+                    modifier = Modifier.size(60.dp).padding(4.dp),
+                    shape = MaterialShapes.Cookie9Sided.toShape(),
+                    colors = IconButtonDefaults.filledIconButtonColors(
+                        containerColor = MaterialTheme.colorScheme.tertiary,
+                        contentColor = MaterialTheme.colorScheme.onTertiary,
+                    ),
+                ) { Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.action_new_note)) }
+            }
+        }
+        else -> null
+    }
+
     Scaffold(
         topBar = {
             when {
@@ -169,7 +199,7 @@ fun YankNavGraph() {
             if (isTopLevel) {
                 BottomNav(
                     navController = nav,
-                    trailingFab = trailingFab(currentRoute, pickImage::launch) { showNoteSheet = true },
+                    trailingFab = trailingFab,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .padding(bottom = 24.dp),
@@ -191,39 +221,3 @@ private fun topTitle(currentRoute: String?): String =
     TopDest.entries.firstOrNull { it.route == currentRoute }
         ?.let { stringResource(it.labelRes) }
         .orEmpty()
-
-@OptIn(ExperimentalMaterial3ExpressiveApi::class)
-@Composable
-private fun trailingFab(
-    currentRoute: String?,
-    onPickImage: (String) -> Unit,
-    onNewNote: () -> Unit,
-): (@Composable RowScope.() -> Unit)? = when (currentRoute) {
-    TopDest.Records.route -> {
-        {
-            FilledIconButton(
-                onClick = { onPickImage("image/*") },
-                modifier = Modifier.size(60.dp).padding(4.dp),
-                shape = MaterialShapes.Cookie9Sided.toShape(),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary,
-                ),
-            ) { Icon(Icons.Outlined.PhotoCamera, contentDescription = stringResource(R.string.action_pick_image)) }
-        }
-    }
-    TopDest.Notes.route -> {
-        {
-            FilledIconButton(
-                onClick = onNewNote,
-                modifier = Modifier.size(60.dp).padding(4.dp),
-                shape = MaterialShapes.Cookie9Sided.toShape(),
-                colors = IconButtonDefaults.filledIconButtonColors(
-                    containerColor = MaterialTheme.colorScheme.tertiary,
-                    contentColor = MaterialTheme.colorScheme.onTertiary,
-                ),
-            ) { Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.action_new_note)) }
-        }
-    }
-    else -> null
-}

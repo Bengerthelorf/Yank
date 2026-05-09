@@ -106,11 +106,47 @@ private fun Loaded(
             verticalArrangement = Arrangement.spacedBy(16.dp),
         ) {
             item { TypeChipRow(entity) }
-            item { PrimaryBlock(entity) }
-            entity.screenshotPath?.let { path ->
-                item { ScreenshotBlock(path) }
+            item {
+                Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
+                    Text(
+                        entity.displayPrimary,
+                        style = MaterialTheme.typography.headlineMedium,
+                        color = MaterialTheme.colorScheme.onSurface,
+                    )
+                    entity.displaySecondary?.takeIf { it.isNotBlank() }?.let {
+                        Text(
+                            it,
+                            style = MaterialTheme.typography.bodyLarge,
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                    }
+                }
             }
-            item { CreatedAtRow(entity) }
+            entity.screenshotPath?.let { path ->
+                item {
+                    Surface(
+                        modifier = Modifier.fillMaxWidth().aspectRatio(0.7f),
+                        shape = RoundedCornerShape(20.dp),
+                        color = MaterialTheme.colorScheme.surfaceVariant,
+                    ) {
+                        ScreenshotImage(
+                            path = path,
+                            contentScale = ContentScale.Fit,
+                            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(20.dp)),
+                        )
+                    }
+                }
+            }
+            item {
+                Text(
+                    text = stringResource(
+                        R.string.detail_created_at,
+                        SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(entity.createdAt)),
+                    ),
+                    style = MaterialTheme.typography.labelSmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                )
+            }
         }
         ActionBar(
             onCopy = onCopy,
@@ -138,51 +174,6 @@ private fun TypeChipRow(entity: HistoryEntity) {
             containerColor = role.container,
             labelColor = role.onContainer,
         ),
-    )
-}
-
-@Composable
-private fun PrimaryBlock(entity: HistoryEntity) {
-    Column(verticalArrangement = Arrangement.spacedBy(6.dp)) {
-        Text(
-            entity.displayPrimary,
-            style = MaterialTheme.typography.headlineMedium,
-            color = MaterialTheme.colorScheme.onSurface,
-        )
-        entity.displaySecondary?.takeIf { it.isNotBlank() }?.let {
-            Text(
-                it,
-                style = MaterialTheme.typography.bodyLarge,
-                color = MaterialTheme.colorScheme.onSurfaceVariant,
-            )
-        }
-    }
-}
-
-@Composable
-private fun ScreenshotBlock(path: String) {
-    Surface(
-        modifier = Modifier.fillMaxWidth().aspectRatio(0.7f),
-        shape = RoundedCornerShape(20.dp),
-        color = MaterialTheme.colorScheme.surfaceVariant,
-    ) {
-        ScreenshotImage(
-            path = path,
-            contentScale = ContentScale.Fit,
-            modifier = Modifier.fillMaxSize().clip(RoundedCornerShape(20.dp)),
-        )
-    }
-}
-
-@Composable
-private fun CreatedAtRow(entity: HistoryEntity) {
-    Text(
-        text = stringResource(
-            R.string.detail_created_at,
-            SimpleDateFormat("yyyy-MM-dd HH:mm", Locale.getDefault()).format(Date(entity.createdAt)),
-        ),
-        style = MaterialTheme.typography.labelSmall,
-        color = MaterialTheme.colorScheme.onSurfaceVariant,
     )
 }
 
