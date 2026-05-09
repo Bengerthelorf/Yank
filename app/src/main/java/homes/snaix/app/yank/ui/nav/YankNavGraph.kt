@@ -3,19 +3,23 @@ package homes.snaix.app.yank.ui.nav
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.RowScope
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
-import androidx.compose.material3.FloatingToolbarDefaults
+import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
+import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -76,18 +80,26 @@ fun YankNavGraph() {
         else -> ""
     }
 
-    val fab: (@Composable () -> Unit)? = when (currentRoute) {
+    val trailingFab: (@Composable RowScope.() -> Unit)? = when (currentRoute) {
         TopDest.Records.route -> {
             {
-                FloatingToolbarDefaults.VibrantFloatingActionButton(
+                FilledIconButton(
                     onClick = { pickImage.launch("image/*") },
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(4.dp),
+                    shape = MaterialShapes.Cookie9Sided.toShape(),
                 ) { Icon(Icons.Outlined.PhotoCamera, contentDescription = "选图识别") }
             }
         }
         TopDest.Notes.route -> {
             {
-                FloatingToolbarDefaults.VibrantFloatingActionButton(
+                FilledIconButton(
                     onClick = { showNoteSheet = true },
+                    modifier = Modifier
+                        .size(56.dp)
+                        .padding(4.dp),
+                    shape = MaterialShapes.Cookie9Sided.toShape(),
                 ) { Icon(Icons.Outlined.Edit, contentDescription = "新建笔记") }
             }
         }
@@ -111,7 +123,7 @@ fun YankNavGraph() {
             }
             BottomNav(
                 navController = nav,
-                fab = fab,
+                trailingFab = trailingFab,
                 modifier = Modifier
                     .align(Alignment.BottomCenter)
                     .padding(bottom = 24.dp),

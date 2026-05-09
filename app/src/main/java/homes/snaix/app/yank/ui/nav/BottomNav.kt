@@ -35,13 +35,17 @@ enum class TopDest(val route: String, val labelRes: Int, val icon: ImageVector) 
 @Composable
 fun BottomNav(
     navController: NavHostController,
-    fab: (@Composable () -> Unit)? = null,
+    trailingFab: (@Composable RowScope.() -> Unit)? = null,
     modifier: Modifier = Modifier,
 ) {
     val backStack by navController.currentBackStackEntryAsState()
     val current = backStack?.destination
 
-    val content: @Composable RowScope.() -> Unit = {
+    HorizontalFloatingToolbar(
+        expanded = true,
+        modifier = modifier,
+        trailingContent = trailingFab,
+    ) {
         TopDest.entries.forEach { dest ->
             val selected = current?.hierarchy?.any { it.route == dest.route } == true
             val onClick: () -> Unit = {
@@ -67,20 +71,5 @@ fun BottomNav(
                 ) { Icon(dest.icon, contentDescription = null) }
             }
         }
-    }
-
-    if (fab != null) {
-        HorizontalFloatingToolbar(
-            expanded = true,
-            floatingActionButton = fab,
-            modifier = modifier,
-            content = content,
-        )
-    } else {
-        HorizontalFloatingToolbar(
-            expanded = true,
-            modifier = modifier,
-            content = content,
-        )
     }
 }
