@@ -18,6 +18,9 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -28,12 +31,16 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.data.db.HistoryEntity
+import homes.snaix.app.yank.domain.schema.Recognition
 import homes.snaix.app.yank.ui.common.EmptyState
 import homes.snaix.app.yank.ui.common.SwipeAction
 import homes.snaix.app.yank.ui.common.SwipeActionsBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
 import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
+import kotlinx.serialization.json.Json
+
+private val NotesJson = Json { ignoreUnknownKeys = true }
 
 @Composable
 fun NotesScreen(onOpenDetail: (String) -> Unit) {
@@ -43,9 +50,11 @@ fun NotesScreen(onOpenDetail: (String) -> Unit) {
     })
     val items by vm.items.collectAsState()
     val copy = rememberCopyEntity()
+    var editTarget by remember { mutableStateOf<HistoryEntity?>(null) }
     val menu = rememberRecordActionMenu(
         onCopy = copy,
         onDelete = { vm.delete(it.id) },
+        onEdit = { editTarget = it },
     )
 
     if (items.isEmpty()) {
@@ -75,6 +84,21 @@ fun NotesScreen(onOpenDetail: (String) -> Unit) {
     }
 
     menu.Host()
+
+    editTarget?.let { entity ->
+        val note = NotesJson.decodeFromString<Recognition>(entity.rawJson) as Recognition.Note
+        ManualNoteSheet(
+            onDismiss = { editTarget = null },
+            onSave = { title, body, date, time -> vm.updateNote(entity, title, body, date, time) },
+            initial = NoteDraft(
+                title = note.title.orEmpty(),
+                body = note.body.orEmpty(),
+                date = note.date.orEmpty(),
+                time = note.time.orEmpty(),
+            ),
+            headerRes = R.string.note_edit,
+        )
+    }
 }
 
 @Composable

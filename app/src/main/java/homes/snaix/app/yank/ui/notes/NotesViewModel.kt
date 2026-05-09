@@ -67,4 +67,14 @@ class NotesViewModel(
     fun delete(id: String) {
         viewModelScope.launch { repo.delete(id) }
     }
+
+    fun updateNote(
+        entity: HistoryEntity,
+        title: String?,
+        body: String,
+        date: String?,
+        time: String?,
+    ) {
+        viewModelScope.launch { repo.updateNote(entity, title, body, date, time) }
+    }
 }

@@ -1,4 +1,3 @@
-// app/src/main/java/homes/snaix/app/yank/domain/schema/DisplayFields.kt
 package homes.snaix.app.yank.domain.schema
 
 fun Recognition.displayPrimary(): String = when (this) {
@@ -29,9 +28,6 @@ fun Recognition.displaySecondary(): String? = when (this) {
     }
     is Recognition.Todo -> "$date $time"
     is Recognition.Note -> {
-        // Prefer the body's first line as the secondary preview when a title
-        // is present (so the card actually shows summary content). Fall back
-        // to date/time when there's no body to preview.
         val bodyLine = body?.lineSequence()?.firstOrNull()?.trim()?.take(80)
         when {
             !title.isNullOrBlank() && !bodyLine.isNullOrBlank() -> bodyLine
@@ -39,4 +35,29 @@ fun Recognition.displaySecondary(): String? = when (this) {
             else -> null
         }
     }
+}
+
+fun Recognition.withPrimary(newPrimary: String): Recognition = when (this) {
+    is Recognition.Queue   -> copy(number = newPrimary)
+    is Recognition.Pickup  -> copy(number = newPrimary)
+    is Recognition.Voucher -> copy(number = newPrimary)
+    is Recognition.Express -> copy(number = newPrimary)
+    is Recognition.Ticket -> when (subType) {
+        TicketSubType.TRAIN   -> copy(trainNo = newPrimary)
+        TicketSubType.FLIGHT  -> copy(flightNo = newPrimary)
+        TicketSubType.MOVIE   -> copy(movie = newPrimary)
+        TicketSubType.GENERIC -> copy(store = newPrimary)
+    }
+    is Recognition.Todo -> copy(title = newPrimary)
+    is Recognition.Note -> copy(title = newPrimary)
+}
+
+fun Recognition.rawTextBlob(): String = when (this) {
+    is Recognition.Queue   -> listOfNotNull(number, store, brand, price).joinToString(" ")
+    is Recognition.Pickup  -> listOfNotNull(number, store, brand, product, price).joinToString(" ")
+    is Recognition.Voucher -> listOfNotNull(number, store, price).joinToString(" ")
+    is Recognition.Express -> listOfNotNull(number, brand, address, station, tracking, remark).joinToString(" ")
+    is Recognition.Ticket  -> listOfNotNull(trainNo, fromStation, toStation, flightNo, departureAirport, arrivalAirport, store, movie, date, time, gate).joinToString(" ")
+    is Recognition.Todo    -> listOfNotNull(title, date, time, location, remark).joinToString(" ")
+    is Recognition.Note    -> listOfNotNull(title, body, date, time).joinToString(" ")
 }

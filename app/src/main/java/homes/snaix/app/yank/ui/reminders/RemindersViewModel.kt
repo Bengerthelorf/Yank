@@ -34,4 +34,7 @@ class RemindersViewModel(
     fun repin(id: String) = viewModelScope.launch {
         repo.get(id)?.let { router.repin(it) }
     }
+    fun updatePrimary(entity: HistoryEntity, newPrimary: String) = viewModelScope.launch {
+        repo.updatePrimary(entity, newPrimary)
+    }
 }

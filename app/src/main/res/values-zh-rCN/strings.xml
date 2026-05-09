@@ -91,7 +91,16 @@
     <string name="action_copy">复制</string>
     <string name="action_archive">归档</string>
     <string name="action_delete">删除</string>
+    <string name="action_edit">编辑</string>
     <string name="action_menu_title">快捷操作</string>
+
+    <!-- Edit primary text sheet -->
+    <string name="edit_primary_header">编辑</string>
+    <string name="edit_primary_label">主要内容</string>
+    <string name="edit_primary_hint">修正识别得到的号码 / 编码 / 标题。其它字段保持模型原样。</string>
+
+    <!-- Edit note -->
+    <string name="note_edit">编辑笔记</string>
 
     <!-- Detail screen -->
     <string name="detail_title">详情</string>

@@ -9,6 +9,7 @@ import homes.snaix.app.yank.domain.schema.Recognition
 import homes.snaix.app.yank.domain.schema.TicketSubType
 import homes.snaix.app.yank.domain.schema.displayPrimary
 import homes.snaix.app.yank.domain.schema.displaySecondary
+import homes.snaix.app.yank.domain.schema.rawTextBlob
 import homes.snaix.app.yank.domain.schema.subType
 import homes.snaix.app.yank.domain.schema.type
 import homes.snaix.app.yank.domain.time.EventClock
@@ -161,12 +162,3 @@ class Router(
     }
 }
 
-private fun Recognition.rawTextBlob(): String = when (this) {
-    is Recognition.Queue   -> listOfNotNull(number, store, brand, price).joinToString(" ")
-    is Recognition.Pickup  -> listOfNotNull(number, store, brand, product, price).joinToString(" ")
-    is Recognition.Voucher -> listOfNotNull(number, store, price).joinToString(" ")
-    is Recognition.Express -> listOfNotNull(number, brand, address, station, tracking, remark).joinToString(" ")
-    is Recognition.Ticket  -> listOfNotNull(trainNo, fromStation, toStation, flightNo, departureAirport, arrivalAirport, store, movie, date, time, gate).joinToString(" ")
-    is Recognition.Todo    -> listOfNotNull(title, date, time, location, remark).joinToString(" ")
-    is Recognition.Note    -> listOfNotNull(title, body, date, time).joinToString(" ")
-}

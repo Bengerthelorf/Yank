@@ -13,6 +13,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.ContentCopy
 import androidx.compose.material.icons.outlined.DeleteOutline
+import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
@@ -112,6 +113,7 @@ class RecordActionMenu internal constructor(
 fun rememberRecordActionMenu(
     onCopy: (HistoryEntity) -> Unit,
     onDelete: (HistoryEntity) -> Unit,
+    onEdit: ((HistoryEntity) -> Unit)? = null,
     onArchive: ((HistoryEntity) -> Unit)? = null,
 ): RecordActionMenu {
     var target by remember { mutableStateOf<HistoryEntity?>(null) }
@@ -125,6 +127,7 @@ fun rememberRecordActionMenu(
                     items = actionItemsFor(
                         onCopy = { onCopy(entity) },
                         onDelete = { onDelete(entity) },
+                        onEdit = onEdit?.let { fn -> { fn(entity) } },
                         onArchive = onArchive?.let { fn -> { fn(entity) } },
                     ),
                     onDismiss = { target = null },
@@ -138,9 +141,13 @@ fun rememberRecordActionMenu(
 private fun actionItemsFor(
     onCopy: () -> Unit,
     onDelete: () -> Unit,
+    onEdit: (() -> Unit)?,
     onArchive: (() -> Unit)?,
 ): List<ActionMenuItem> = buildList {
     add(ActionMenuItem(Icons.Outlined.ContentCopy, R.string.action_copy, onClick = onCopy))
+    if (onEdit != null) {
+        add(ActionMenuItem(Icons.Outlined.Edit, R.string.action_edit, onClick = onEdit))
+    }
     if (onArchive != null) {
         add(ActionMenuItem(Icons.Outlined.Archive, R.string.action_archive, onClick = onArchive))
     }

@@ -22,21 +22,30 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import homes.snaix.app.yank.R
 
+data class NoteDraft(
+    val title: String = "",
+    val body: String = "",
+    val date: String = "",
+    val time: String = "",
+)
+
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ManualNoteSheet(
     onDismiss: () -> Unit,
     onSave: (title: String?, body: String, date: String?, time: String?) -> Unit,
+    initial: NoteDraft = NoteDraft(),
+    headerRes: Int = R.string.note_new,
 ) {
     val state = rememberModalBottomSheetState(skipPartiallyExpanded = true)
-    var title by remember { mutableStateOf("") }
-    var body by remember { mutableStateOf("") }
-    var date by remember { mutableStateOf("") }
-    var time by remember { mutableStateOf("") }
+    var title by remember { mutableStateOf(initial.title) }
+    var body by remember { mutableStateOf(initial.body) }
+    var date by remember { mutableStateOf(initial.date) }
+    var time by remember { mutableStateOf(initial.time) }
 
     ModalBottomSheet(onDismissRequest = onDismiss, sheetState = state) {
         Column(Modifier.padding(24.dp), verticalArrangement = Arrangement.spacedBy(12.dp)) {
-            Text(stringResource(R.string.note_new))
+            Text(stringResource(headerRes))
             OutlinedTextField(value = title, onValueChange = { title = it }, label = { Text(stringResource(R.string.note_title_optional)) }, modifier = Modifier.fillMaxWidth())
             OutlinedTextField(value = body, onValueChange = { body = it }, label = { Text(stringResource(R.string.note_body)) }, modifier = Modifier.fillMaxWidth(), minLines = 3)
             Row(horizontalArrangement = Arrangement.spacedBy(8.dp)) {

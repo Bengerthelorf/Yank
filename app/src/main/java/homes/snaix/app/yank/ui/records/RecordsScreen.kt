@@ -13,6 +13,9 @@ import androidx.compose.material.icons.outlined.History
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -22,6 +25,8 @@ import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
+import homes.snaix.app.yank.data.db.HistoryEntity
+import homes.snaix.app.yank.ui.common.EditPrimarySheet
 import homes.snaix.app.yank.ui.common.EmptyState
 import homes.snaix.app.yank.ui.common.SwipeAction
 import homes.snaix.app.yank.ui.common.SwipeActionsBox
@@ -40,9 +45,11 @@ fun RecordsScreen(onOpenDetail: (String) -> Unit) {
     val filter by vm.filter.collectAsState()
     val hasAnyData by vm.hasAnyData.collectAsState()
     val copy = rememberCopyEntity()
+    var editTarget by remember { mutableStateOf<HistoryEntity?>(null) }
     val menu = rememberRecordActionMenu(
         onCopy = copy,
         onDelete = { vm.delete(it.id) },
+        onEdit = { editTarget = it },
         onArchive = { vm.archive(it.id) },
     )
     val swipe = rememberSwipeActions(
@@ -91,4 +98,12 @@ fun RecordsScreen(onOpenDetail: (String) -> Unit) {
     }
 
     menu.Host()
+
+    editTarget?.let { entity ->
+        EditPrimarySheet(
+            initial = entity.displayPrimary,
+            onDismiss = { editTarget = null },
+            onSave = { vm.updatePrimary(entity, it) },
+        )
+    }
 }

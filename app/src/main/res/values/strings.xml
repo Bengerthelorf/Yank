@@ -91,7 +91,16 @@
     <string name="action_copy">Copy</string>
     <string name="action_archive">Archive</string>
     <string name="action_delete">Delete</string>
+    <string name="action_edit">Edit</string>
     <string name="action_menu_title">Quick actions</string>
+
+    <!-- Edit primary text sheet -->
+    <string name="edit_primary_header">Edit</string>
+    <string name="edit_primary_label">Primary value</string>
+    <string name="edit_primary_hint">Fix the recognized number / code / title here. Other fields stay as the model parsed them.</string>
+
+    <!-- Edit note -->
+    <string name="note_edit">Edit note</string>
 
     <!-- Detail screen -->
     <string name="detail_title">Detail</string>
