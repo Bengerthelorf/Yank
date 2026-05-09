@@ -5,9 +5,11 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import homes.snaix.app.yank.data.repo.ConfigRepository
 import homes.snaix.app.yank.domain.schema.type
+import homes.snaix.app.yank.domain.vlm.ModelTier
 import homes.snaix.app.yank.domain.vlm.VlmClient
 import homes.snaix.app.yank.domain.vlm.VlmConfig
 import homes.snaix.app.yank.domain.vlm.VlmException
+import homes.snaix.app.yank.domain.vlm.VlmProvider
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -32,6 +34,20 @@ class SettingsViewModel(
 
     fun setBaseUrl(v: String) { viewModelScope.launch { repo.setBaseUrl(v) } }
     fun setModel(v: String) { viewModelScope.launch { repo.setModel(v) } }
+
+    /** Atomically set baseUrl + model from a known provider preset. */
+    fun setProvider(provider: VlmProvider, tier: ModelTier) {
+        viewModelScope.launch {
+            repo.setBaseUrl(provider.baseUrl)
+            repo.setModel(
+                when (tier) {
+                    ModelTier.FAST -> provider.fastModel
+                    ModelTier.CAPABLE -> provider.capableModel
+                }
+            )
+        }
+    }
+
     fun setSystemPrompt(v: String) { viewModelScope.launch { repo.setSystemPrompt(v) } }
     fun resetSystemPrompt() { viewModelScope.launch { repo.resetSystemPrompt() } }
     fun setApiKey(v: String?) { repo.setApiKey(v) }
