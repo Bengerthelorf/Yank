@@ -23,7 +23,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.ui.common.EmptyState
-import homes.snaix.app.yank.ui.common.SwipeToDeleteBox
+import homes.snaix.app.yank.ui.common.SwipeActionsBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
 import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
@@ -33,7 +33,7 @@ import homes.snaix.app.yank.ui.records.TypeCard
 fun RemindersScreen(onOpenDetail: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as YankApp
     val vm: RemindersViewModel = viewModel(factory = viewModelFactory {
-        initializer { RemindersViewModel(app.di.historyRepo) }
+        initializer { RemindersViewModel(app.di.historyRepo, app.di.router) }
     })
     val state by vm.state.collectAsState()
     val copy = rememberCopyEntity()
@@ -60,7 +60,10 @@ fun RemindersScreen(onOpenDetail: (String) -> Unit) {
                     )
                 }
                 items(state.active, key = { it.id }) { e ->
-                    SwipeToDeleteBox(onDelete = { vm.delete(e.id) }) {
+                    SwipeActionsBox(
+                        onSwipeLeft = { vm.delete(e.id) },
+                        onSwipeRight = { vm.repin(e.id) },
+                    ) {
                         TypeCard(
                             entity = e,
                             onClick = { onOpenDetail(e.id) },
@@ -79,7 +82,10 @@ fun RemindersScreen(onOpenDetail: (String) -> Unit) {
                     )
                 }
                 items(state.upcoming, key = { it.id }) { e ->
-                    SwipeToDeleteBox(onDelete = { vm.delete(e.id) }) {
+                    SwipeActionsBox(
+                        onSwipeLeft = { vm.delete(e.id) },
+                        onSwipeRight = { vm.repin(e.id) },
+                    ) {
                         TypeCard(
                             entity = e,
                             onClick = { onOpenDetail(e.id) },

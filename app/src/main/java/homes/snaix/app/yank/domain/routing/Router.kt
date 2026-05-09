@@ -109,6 +109,20 @@ class Router(
         }
     }
 
+    suspend fun repin(entity: HistoryEntity) {
+        if (entity.type == "notes") return
+        val r = json.decodeFromString<Recognition>(entity.rawJson)
+        val payload = entity.zxingPayloads?.split(',')?.firstOrNull()
+        val tNow = now()
+        val archiveAtMs = computeArchiveAt(r, tNow, computeEventTime(r))
+        val nid = nextNotificationId()
+        if (entity.archived || entity.archiveAt != archiveAtMs) {
+            repo.upsert(entity.copy(archived = false, archiveAt = archiveAtMs))
+        }
+        publisher.publish(entity, nid, r, payload)
+        scheduler.scheduleArchive(entity.id, archiveAtMs, nid)
+    }
+
     private fun computeEventTime(r: Recognition): Long? = when (r) {
         is Recognition.Ticket -> when (r.subType) {
             TicketSubType.TRAIN  -> clock.toEpochMillis(r.trainDate, r.trainDepartTime)

@@ -23,7 +23,7 @@ import androidx.lifecycle.viewmodel.viewModelFactory
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.ui.common.EmptyState
-import homes.snaix.app.yank.ui.common.SwipeToDeleteBox
+import homes.snaix.app.yank.ui.common.SwipeActionsBox
 import homes.snaix.app.yank.ui.common.rememberCopyEntity
 import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
@@ -32,7 +32,7 @@ import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 fun RecordsScreen(onOpenDetail: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as YankApp
     val vm: RecordsViewModel = viewModel(factory = viewModelFactory {
-        initializer { RecordsViewModel(app.di.historyRepo) }
+        initializer { RecordsViewModel(app.di.historyRepo, app.di.router) }
     })
     val items by vm.items.collectAsState()
     val filter by vm.filter.collectAsState()
@@ -65,7 +65,12 @@ fun RecordsScreen(onOpenDetail: (String) -> Unit) {
         } else {
             LazyColumn(modifier = Modifier.fillMaxSize()) {
                 items(items, key = { it.id }) { entity ->
-                    SwipeToDeleteBox(onDelete = { vm.delete(entity.id) }) {
+                    SwipeActionsBox(
+                        onSwipeLeft = { vm.delete(entity.id) },
+                        onSwipeRight = if (entity.type != "notes") {
+                            { vm.repin(entity.id) }
+                        } else null,
+                    ) {
                         TypeCard(
                             entity = entity,
                             onClick = { onOpenDetail(entity.id) },
