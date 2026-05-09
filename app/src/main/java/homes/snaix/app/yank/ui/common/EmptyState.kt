@@ -14,6 +14,7 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 
 @Composable
 fun EmptyState(
@@ -23,7 +24,12 @@ fun EmptyState(
     modifier: Modifier = Modifier,
 ) {
     Column(
-        modifier = modifier.fillMaxSize().padding(start = 32.dp, end = 32.dp, top = 32.dp, bottom = 96.dp),
+        modifier = modifier.fillMaxSize().padding(
+            start = 32.dp,
+            end = 32.dp,
+            top = 32.dp,
+            bottom = BottomNavReservedHeight,
+        ),
         verticalArrangement = Arrangement.Center,
         horizontalAlignment = Alignment.CenterHorizontally,
     ) {

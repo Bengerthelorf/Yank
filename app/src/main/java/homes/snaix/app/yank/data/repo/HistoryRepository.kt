@@ -21,6 +21,7 @@ class HistoryRepository(
     fun observeNotes(query: String?): Flow<List<HistoryEntity>> = historyDao.observeNotes(query)
     fun observeArchived(query: String?): Flow<List<HistoryEntity>> = historyDao.observeArchived(query)
     fun observeUpcoming(now: Long): Flow<List<HistoryEntity>> = historyDao.observeUpcoming(now)
+    fun observeAnyRecord(): Flow<Boolean> = historyDao.observeAnyRecord()
 
     suspend fun findFreshDedup(key: String, since: Long): DedupEntity? =
         dedupDao.findFreshActive(key, since)

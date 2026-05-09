@@ -31,7 +31,10 @@ import homes.snaix.app.yank.R
 /**
  * Vertical clearance to reserve at the bottom of any list-based screen so the
  * floating pill (and any snackbar that sits above it) doesn't occlude the
- * last items. Updated together with the pill height/padding constants below.
+ * last items. Roughly accounts for: 56 dp pill height + 4 dp inner padding +
+ * 24 dp bottom offset (see [YankNavGraph]'s `padding(bottom = 24.dp)` on
+ * [BottomNav]) + 12 dp breathing room. Update together if any of those
+ * pill constants moves.
  */
 val BottomNavReservedHeight = 96.dp
 

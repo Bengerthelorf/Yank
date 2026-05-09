@@ -30,9 +30,9 @@ import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 
 @Composable
 fun NotesScreen() {
-    val ctx = LocalContext.current.applicationContext as YankApp
+    val app = LocalContext.current.applicationContext as YankApp
     val vm: NotesViewModel = viewModel(factory = viewModelFactory {
-        initializer { NotesViewModel(ctx.di.historyRepo) }
+        initializer { NotesViewModel(app.di.historyRepo) }
     })
     val items by vm.items.collectAsState()
 

@@ -54,14 +54,15 @@ import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.domain.vlm.ModelTier
 import homes.snaix.app.yank.domain.vlm.VlmProvider
+import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 import kotlinx.coroutines.flow.first
 
 @OptIn(ExperimentalMaterial3ExpressiveApi::class, ExperimentalMaterial3Api::class)
 @Composable
 fun SettingsScreen() {
-    val ctx = LocalContext.current.applicationContext as YankApp
+    val app = LocalContext.current.applicationContext as YankApp
     val vm: SettingsViewModel = viewModel(factory = viewModelFactory {
-        initializer { SettingsViewModel(ctx, ctx.di.configRepo, ctx.di.vlmClient) }
+        initializer { SettingsViewModel(app, app.di.configRepo, app.di.vlmClient) }
     })
     val test by vm.testState.collectAsState()
 
@@ -79,14 +80,14 @@ fun SettingsScreen() {
     var advancedExpanded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
-        val snap = ctx.di.configRepo.observeVlmConfig().first()
+        val snap = app.di.configRepo.observeVlmConfig().first()
         baseUrl = snap.baseUrl
         model = snap.model
         apiKey = snap.apiKey.orEmpty()
         prompt = snap.systemPrompt
-        keepScreenshot = ctx.di.configRepo.screenshotRetention().first()
-        lockHide = ctx.di.configRepo.lockHide().first()
-        localeTag = ctx.di.configRepo.localeTag().first()
+        keepScreenshot = app.di.configRepo.screenshotRetention().first()
+        lockHide = app.di.configRepo.lockHide().first()
+        localeTag = app.di.configRepo.localeTag().first()
 
         // Derive provider/tier from current baseUrl + model
         val matched = VlmProvider.fromBaseUrl(snap.baseUrl)
@@ -352,6 +353,6 @@ fun SettingsScreen() {
             }
         }
 
-        Spacer(Modifier.height(96.dp))
+        Spacer(Modifier.height(BottomNavReservedHeight))
     }
 }

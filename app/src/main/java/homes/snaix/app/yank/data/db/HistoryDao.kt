@@ -47,6 +47,16 @@ interface HistoryDao {
     """)
     fun observeUpcoming(now: Long): Flow<List<HistoryEntity>>
 
+    /**
+     * Whether the user has ever recorded *any* non-notes entry, regardless of
+     * archive state. The Records screen uses this to suppress chip rendering
+     * only on a truly pristine database — once anything has been recorded
+     * (active or archived) the chips must stay reachable so the Archived
+     * filter is never a dead end.
+     */
+    @Query("SELECT EXISTS(SELECT 1 FROM history WHERE type != 'notes')")
+    fun observeAnyRecord(): Flow<Boolean>
+
     @Query("UPDATE history SET archived = 1 WHERE id = :id")
     suspend fun setArchived(id: String)
 

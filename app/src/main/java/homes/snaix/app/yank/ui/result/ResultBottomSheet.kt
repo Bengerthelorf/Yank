@@ -29,8 +29,8 @@ import homes.snaix.app.yank.domain.capture.PipelineOutcome
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ResultBottomSheetHost() {
-    val ctx = LocalContext.current.applicationContext as YankApp
-    val outcomes = ctx.di.captureOutcomes
+    val app = LocalContext.current.applicationContext as YankApp
+    val outcomes = app.di.captureOutcomes
     var current by remember { mutableStateOf<PipelineOutcome?>(null) }
 
     LaunchedEffect(outcomes) {

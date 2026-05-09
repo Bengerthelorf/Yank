@@ -4,8 +4,10 @@ import androidx.annotation.StringRes
 import homes.snaix.app.yank.R
 
 /**
- * Single source of truth for the seven type discriminators that the model
- * is allowed to emit. Each enum value carries:
+ * Single source of truth for the six *recordable* type discriminators that
+ * the model is allowed to emit. The seventh schema discriminator, `notes`,
+ * is intentionally excluded — Notes live on a dedicated screen and never
+ * participate in chip filtering or color theming. Each enum value carries:
  *   - `discriminator`: the literal Chinese string that appears in the JSON
  *     contract (model output) and is stored in [HistoryEntity.type]. Do NOT
  *     localize — this is a domain value, not a UI string.

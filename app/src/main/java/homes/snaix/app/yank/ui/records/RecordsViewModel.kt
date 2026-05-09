@@ -13,7 +13,6 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.flatMapLatest
-import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.flow.stateIn
 
 /**
@@ -63,13 +62,14 @@ class RecordsViewModel(
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
     /**
-     * Whether the database has any active record at all, independent of the
-     * current filter. The screen uses this to distinguish the genuine "nothing
-     * to show yet" empty state from "the current filter matched nothing".
+     * Whether the database has any non-notes record at all, archived or not.
+     * The screen uses this to distinguish the genuine "nothing recorded yet"
+     * empty state from "the current filter matched nothing". Includes
+     * archived rows so a fully-archived DB still keeps the chip row (and
+     * therefore the Archived chip) reachable.
      */
     val hasAnyData: StateFlow<Boolean> =
-        repo.observeRecords(null, null)
-            .map { it.isNotEmpty() }
+        repo.observeAnyRecord()
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)
 
     fun setFilter(f: RecordFilter) { _filter.value = f }
