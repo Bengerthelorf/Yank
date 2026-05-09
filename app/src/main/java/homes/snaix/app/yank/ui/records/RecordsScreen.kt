@@ -35,7 +35,7 @@ import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 fun RecordsScreen(onOpenDetail: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as YankApp
     val vm: RecordsViewModel = viewModel(factory = viewModelFactory {
-        initializer { RecordsViewModel(app.di.historyRepo, app.di.router) }
+        initializer { RecordsViewModel(app.di.historyRepo, app.di.router, app.di.deletedBus) }
     })
     val items by vm.items.collectAsState()
     val filter by vm.filter.collectAsState()

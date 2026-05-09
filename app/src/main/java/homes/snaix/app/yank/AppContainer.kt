@@ -63,4 +63,12 @@ class AppContainer(private val ctx: Context) {
     )
     val captureOutcomeBus: MutableSharedFlow<homes.snaix.app.yank.domain.capture.PipelineOutcome> = _outcomes
     val captureOutcomes: SharedFlow<homes.snaix.app.yank.domain.capture.PipelineOutcome> = _outcomes.asSharedFlow()
+
+    // Carries deleted entities so the NavGraph can offer an Undo snackbar.
+    // replay = 0 + buffer = 8 mirrors the outcome bus rationale.
+    private val _deleted = MutableSharedFlow<homes.snaix.app.yank.data.db.HistoryEntity>(
+        replay = 0, extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST
+    )
+    val deletedBus: MutableSharedFlow<homes.snaix.app.yank.data.db.HistoryEntity> = _deleted
+    val deletedEntities: SharedFlow<homes.snaix.app.yank.data.db.HistoryEntity> = _deleted.asSharedFlow()
 }

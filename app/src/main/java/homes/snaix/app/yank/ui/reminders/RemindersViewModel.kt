@@ -5,6 +5,7 @@ import androidx.lifecycle.viewModelScope
 import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.data.repo.HistoryRepository
 import homes.snaix.app.yank.domain.routing.Router
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.map
@@ -19,6 +20,7 @@ data class RemindersUiState(
 class RemindersViewModel(
     private val repo: HistoryRepository,
     private val router: Router,
+    private val deletedBus: MutableSharedFlow<HistoryEntity>,
 ) : ViewModel() {
     val state: StateFlow<RemindersUiState> = repo.observeUpcoming(0L)
         .map { all ->
@@ -29,7 +31,11 @@ class RemindersViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.Eagerly, RemindersUiState(emptyList(), emptyList()))
 
-    fun delete(id: String) = viewModelScope.launch { repo.delete(id) }
+    fun delete(id: String) = viewModelScope.launch {
+        val entity = repo.get(id) ?: return@launch
+        repo.delete(id)
+        deletedBus.emit(entity)
+    }
     fun archive(id: String) = viewModelScope.launch { repo.setArchived(id) }
     fun repin(id: String) = viewModelScope.launch {
         repo.get(id)?.let { router.repin(it) }

@@ -111,7 +111,11 @@
     <!-- Swipe actions -->
     <string name="swipe_action_delete">Delete</string>
     <string name="swipe_action_archive">Archive</string>
-    <string name="swipe_action_pin">Pin</string>
+    <string name="swipe_action_pin">Live notification</string>
+
+    <!-- Undo deletion -->
+    <string name="action_undo">Undo</string>
+    <string name="snackbar_deleted">Deleted</string>
     <string name="section_swipe">Swipe gestures</string>
     <string name="settings_swipe_left">Swipe left</string>
     <string name="settings_swipe_right">Swipe right</string>

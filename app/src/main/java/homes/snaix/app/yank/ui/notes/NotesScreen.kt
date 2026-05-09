@@ -39,7 +39,7 @@ import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 fun NotesScreen(onOpenDetail: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as YankApp
     val vm: NotesViewModel = viewModel(factory = viewModelFactory {
-        initializer { NotesViewModel(app.di.historyRepo) }
+        initializer { NotesViewModel(app.di.historyRepo, app.di.deletedBus) }
     })
     val items by vm.items.collectAsState()
     val copy = rememberCopyEntity()

@@ -6,6 +6,7 @@ import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.data.db.Source
 import homes.snaix.app.yank.data.repo.HistoryRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
@@ -19,6 +20,7 @@ import java.util.UUID
 
 class NotesViewModel(
     private val repo: HistoryRepository,
+    private val deletedBus: MutableSharedFlow<HistoryEntity>,
 ) : ViewModel() {
 
     private val _query = MutableStateFlow<String?>(null)
@@ -65,7 +67,11 @@ class NotesViewModel(
     }
 
     fun delete(id: String) {
-        viewModelScope.launch { repo.delete(id) }
+        viewModelScope.launch {
+            val entity = repo.get(id) ?: return@launch
+            repo.delete(id)
+            deletedBus.emit(entity)
+        }
     }
 
     fun updateNote(

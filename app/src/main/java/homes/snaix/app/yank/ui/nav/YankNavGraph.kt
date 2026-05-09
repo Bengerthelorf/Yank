@@ -26,8 +26,10 @@ import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarDuration
 import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
+import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.toShape
@@ -91,6 +93,21 @@ fun YankNavGraph() {
         }
     }
 
+    val deletedMsg = stringResource(R.string.snackbar_deleted)
+    val undoLabel = stringResource(R.string.action_undo)
+    LaunchedEffect(Unit) {
+        app.di.deletedEntities.collect { entity ->
+            val result = snackbarHostState.showSnackbar(
+                message = deletedMsg,
+                actionLabel = undoLabel,
+                duration = SnackbarDuration.Short,
+            )
+            if (result == SnackbarResult.ActionPerformed) {
+                app.di.historyRepo.upsert(entity)
+            }
+        }
+    }
+
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             scope.launch {
@@ -106,7 +123,7 @@ fun YankNavGraph() {
     }
 
     val notesVm: NotesViewModel = viewModel(factory = viewModelFactory {
-        initializer { NotesViewModel(app.di.historyRepo) }
+        initializer { NotesViewModel(app.di.historyRepo, app.di.deletedBus) }
     })
     var showNoteSheet by remember { mutableStateOf(false) }
 

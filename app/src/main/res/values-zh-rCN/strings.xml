@@ -111,7 +111,11 @@
     <!-- Swipe actions -->
     <string name="swipe_action_delete">删除</string>
     <string name="swipe_action_archive">归档</string>
-    <string name="swipe_action_pin">置顶通知</string>
+    <string name="swipe_action_pin">实时通知</string>
+
+    <!-- Undo deletion -->
+    <string name="action_undo">撤销</string>
+    <string name="snackbar_deleted">已删除</string>
     <string name="section_swipe">滑动手势</string>
     <string name="settings_swipe_left">左滑</string>
     <string name="settings_swipe_right">右滑</string>

@@ -7,6 +7,7 @@ import homes.snaix.app.yank.R
 import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.data.repo.HistoryRepository
 import homes.snaix.app.yank.domain.routing.Router
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -36,6 +37,7 @@ sealed interface RecordFilter {
 class RecordsViewModel(
     private val repo: HistoryRepository,
     private val router: Router,
+    private val deletedBus: MutableSharedFlow<HistoryEntity>,
 ) : ViewModel() {
 
     private val _filter = MutableStateFlow<RecordFilter>(RecordFilter.All)
@@ -64,7 +66,11 @@ class RecordsViewModel(
 
     fun setFilter(f: RecordFilter) { _filter.value = f }
     fun setQuery(q: String?) { _query.value = q?.takeIf { it.isNotBlank() } }
-    fun delete(id: String) = viewModelScope.launch { repo.delete(id) }
+    fun delete(id: String) = viewModelScope.launch {
+        val entity = repo.get(id) ?: return@launch
+        repo.delete(id)
+        deletedBus.emit(entity)
+    }
     fun archive(id: String) = viewModelScope.launch { repo.setArchived(id) }
     fun repin(id: String) = viewModelScope.launch {
         repo.get(id)?.let { router.repin(it) }

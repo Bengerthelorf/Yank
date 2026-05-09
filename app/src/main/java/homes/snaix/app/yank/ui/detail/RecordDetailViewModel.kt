@@ -4,6 +4,7 @@ import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import homes.snaix.app.yank.data.db.HistoryEntity
 import homes.snaix.app.yank.data.repo.HistoryRepository
+import kotlinx.coroutines.flow.MutableSharedFlow
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
@@ -17,6 +18,7 @@ sealed interface DetailState {
 
 class RecordDetailViewModel(
     private val repo: HistoryRepository,
+    private val deletedBus: MutableSharedFlow<HistoryEntity>,
     private val id: String,
 ) : ViewModel() {
 
@@ -29,6 +31,10 @@ class RecordDetailViewModel(
         }
     }
 
-    fun delete() = viewModelScope.launch { repo.delete(id) }
+    fun delete() = viewModelScope.launch {
+        val entity = repo.get(id) ?: return@launch
+        repo.delete(id)
+        deletedBus.emit(entity)
+    }
     fun archive() = viewModelScope.launch { repo.setArchived(id) }
 }

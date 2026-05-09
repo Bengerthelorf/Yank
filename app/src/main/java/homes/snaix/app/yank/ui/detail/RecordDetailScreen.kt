@@ -60,7 +60,7 @@ fun RecordDetailScreen(
 ) {
     val app = LocalContext.current.applicationContext as YankApp
     val vm: RecordDetailViewModel = viewModel(factory = viewModelFactory {
-        initializer { RecordDetailViewModel(app.di.historyRepo, entityId) }
+        initializer { RecordDetailViewModel(app.di.historyRepo, app.di.deletedBus, entityId) }
     })
     val state by vm.state.collectAsState()
     val copy = rememberCopyEntity()

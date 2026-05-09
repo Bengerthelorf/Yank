@@ -35,7 +35,7 @@ import homes.snaix.app.yank.ui.records.TypeCard
 fun RemindersScreen(onOpenDetail: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as YankApp
     val vm: RemindersViewModel = viewModel(factory = viewModelFactory {
-        initializer { RemindersViewModel(app.di.historyRepo, app.di.router) }
+        initializer { RemindersViewModel(app.di.historyRepo, app.di.router, app.di.deletedBus) }
     })
     val state by vm.state.collectAsState()
     val copy = rememberCopyEntity()

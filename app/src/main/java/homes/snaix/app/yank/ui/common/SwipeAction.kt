@@ -4,17 +4,19 @@ import androidx.annotation.StringRes
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Archive
 import androidx.compose.material.icons.outlined.DeleteOutline
-import androidx.compose.material.icons.outlined.PushPin
+import androidx.compose.material.icons.outlined.NotificationsActive
 import androidx.compose.ui.graphics.vector.ImageVector
 import homes.snaix.app.yank.R
 
+// Enum names are persisted as the swipe-config wire format. Renaming a value
+// without a migration would break already-stored "Delete" / "Pin" keys.
 enum class SwipeAction(
     val icon: ImageVector,
     @StringRes val labelRes: Int,
 ) {
     Delete(Icons.Outlined.DeleteOutline, R.string.swipe_action_delete),
     Archive(Icons.Outlined.Archive, R.string.swipe_action_archive),
-    Pin(Icons.Outlined.PushPin, R.string.swipe_action_pin);
+    Pin(Icons.Outlined.NotificationsActive, R.string.swipe_action_pin);
 
     companion object {
         // Unknown key disables the swipe; renaming an entry must not crash
