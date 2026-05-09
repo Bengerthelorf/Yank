@@ -67,9 +67,7 @@ fun RecordsScreen(onOpenDetail: (String) -> Unit) {
                 items(items, key = { it.id }) { entity ->
                     SwipeActionsBox(
                         onSwipeLeft = { vm.delete(entity.id) },
-                        onSwipeRight = if (entity.type != "notes") {
-                            { vm.repin(entity.id) }
-                        } else null,
+                        onSwipeRight = { vm.repin(entity.id) },
                     ) {
                         TypeCard(
                             entity = entity,
