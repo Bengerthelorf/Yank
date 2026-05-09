@@ -30,7 +30,7 @@ import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 import homes.snaix.app.yank.ui.records.TypeCard
 
 @Composable
-fun RemindersScreen() {
+fun RemindersScreen(onOpenDetail: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as YankApp
     val vm: RemindersViewModel = viewModel(factory = viewModelFactory {
         initializer { RemindersViewModel(app.di.historyRepo) }
@@ -63,7 +63,7 @@ fun RemindersScreen() {
                     SwipeToDeleteBox(onDelete = { vm.delete(e.id) }) {
                         TypeCard(
                             entity = e,
-                            onClick = { copy(e) },
+                            onClick = { onOpenDetail(e.id) },
                             onLongClick = { menu.openMenu(e) },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                         )
@@ -82,7 +82,7 @@ fun RemindersScreen() {
                     SwipeToDeleteBox(onDelete = { vm.delete(e.id) }) {
                         TypeCard(
                             entity = e,
-                            onClick = { copy(e) },
+                            onClick = { onOpenDetail(e.id) },
                             onLongClick = { menu.openMenu(e) },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                         )

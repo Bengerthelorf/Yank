@@ -35,7 +35,7 @@ import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 
 @Composable
-fun NotesScreen() {
+fun NotesScreen(onOpenDetail: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as YankApp
     val vm: NotesViewModel = viewModel(factory = viewModelFactory {
         initializer { NotesViewModel(app.di.historyRepo) }
@@ -59,7 +59,7 @@ fun NotesScreen() {
                 SwipeToDeleteBox(onDelete = { vm.delete(e.id) }) {
                     NoteCard(
                         entity = e,
-                        onClick = { copy(e) },
+                        onClick = { onOpenDetail(e.id) },
                         onLongClick = { menu.openMenu(e) },
                         modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                     )

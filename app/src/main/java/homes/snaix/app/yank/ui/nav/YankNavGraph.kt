@@ -13,12 +13,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.outlined.ArrowBack
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.PhotoCamera
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
 import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
@@ -45,14 +47,17 @@ import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.lifecycle.viewmodel.initializer
 import androidx.lifecycle.viewmodel.viewModelFactory
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.domain.capture.PipelineOutcome
 import homes.snaix.app.yank.ui.common.ProcessingCard
+import homes.snaix.app.yank.ui.detail.RecordDetailScreen
 import homes.snaix.app.yank.ui.notes.ManualNoteSheet
 import homes.snaix.app.yank.ui.notes.NotesScreen
 import homes.snaix.app.yank.ui.notes.NotesViewModel
@@ -60,6 +65,9 @@ import homes.snaix.app.yank.ui.records.RecordsScreen
 import homes.snaix.app.yank.ui.reminders.RemindersScreen
 import homes.snaix.app.yank.ui.settings.SettingsScreen
 import kotlinx.coroutines.launch
+
+private const val DetailRoute = "detail/{id}"
+private fun detailRouteFor(id: String) = "detail/$id"
 
 @OptIn(ExperimentalMaterial3Api::class, ExperimentalMaterial3ExpressiveApi::class)
 @Composable
@@ -102,50 +110,26 @@ fun YankNavGraph() {
     })
     var showNoteSheet by remember { mutableStateOf(false) }
 
-    val title = when (currentRoute) {
-        TopDest.Records.route   -> stringResource(R.string.tab_records)
-        TopDest.Notes.route     -> stringResource(R.string.tab_notes)
-        TopDest.Reminders.route -> stringResource(R.string.tab_reminders)
-        TopDest.Settings.route  -> stringResource(R.string.tab_settings)
-        else -> ""
-    }
+    val isTopLevel = TopDest.entries.any { it.route == currentRoute }
+    val isDetail = currentRoute == DetailRoute
 
-    val trailingFab: (@Composable RowScope.() -> Unit)? = when (currentRoute) {
-        TopDest.Records.route -> {
-            {
-                FilledIconButton(
-                    onClick = { pickImage.launch("image/*") },
-                    modifier = Modifier
-                        .size(60.dp)
-                        .padding(4.dp),
-                    shape = MaterialShapes.Cookie9Sided.toShape(),
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary,
-                    ),
-                ) { Icon(Icons.Outlined.PhotoCamera, contentDescription = stringResource(R.string.action_pick_image)) }
-            }
-        }
-        TopDest.Notes.route -> {
-            {
-                FilledIconButton(
-                    onClick = { showNoteSheet = true },
-                    modifier = Modifier
-                        .size(60.dp)
-                        .padding(4.dp),
-                    shape = MaterialShapes.Cookie9Sided.toShape(),
-                    colors = IconButtonDefaults.filledIconButtonColors(
-                        containerColor = MaterialTheme.colorScheme.tertiary,
-                        contentColor = MaterialTheme.colorScheme.onTertiary,
-                    ),
-                ) { Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.action_new_note)) }
-            }
-        }
-        else -> null
-    }
+    val openDetail: (String) -> Unit = { id -> nav.navigate(detailRouteFor(id)) }
 
     Scaffold(
-        topBar = { TopAppBar(title = { Text(title) }) },
+        topBar = {
+            when {
+                isTopLevel -> TopAppBar(title = { Text(topTitle(currentRoute)) })
+                isDetail -> TopAppBar(
+                    title = { Text(stringResource(R.string.detail_title)) },
+                    navigationIcon = {
+                        IconButton(onClick = { nav.popBackStack() }) {
+                            Icon(Icons.AutoMirrored.Outlined.ArrowBack, contentDescription = null)
+                        }
+                    },
+                )
+                else -> TopAppBar(title = { Text("") })
+            }
+        },
         snackbarHost = {
             SnackbarHost(
                 hostState = snackbarHostState,
@@ -160,26 +144,37 @@ fun YankNavGraph() {
                 startDestination = TopDest.Records.route,
                 modifier = Modifier.fillMaxSize(),
             ) {
-                composable(TopDest.Records.route)   { RecordsScreen() }
-                composable(TopDest.Notes.route)     { NotesScreen() }
-                composable(TopDest.Reminders.route) { RemindersScreen() }
+                composable(TopDest.Records.route)   { RecordsScreen(onOpenDetail = openDetail) }
+                composable(TopDest.Notes.route)     { NotesScreen(onOpenDetail = openDetail) }
+                composable(TopDest.Reminders.route) { RemindersScreen(onOpenDetail = openDetail) }
                 composable(TopDest.Settings.route)  { SettingsScreen() }
+                composable(
+                    DetailRoute,
+                    arguments = listOf(navArgument("id") { type = NavType.StringType }),
+                ) { entry ->
+                    RecordDetailScreen(
+                        entityId = entry.arguments!!.getString("id")!!,
+                        onBack = { nav.popBackStack() },
+                    )
+                }
             }
             AnimatedVisibility(
-                visible = processingCount > 0,
+                visible = isTopLevel && processingCount > 0,
                 enter = slideInVertically { -it } + fadeIn(),
                 exit = slideOutVertically { -it } + fadeOut(),
                 modifier = Modifier.align(Alignment.TopCenter).padding(top = 12.dp),
             ) {
                 ProcessingCard()
             }
-            BottomNav(
-                navController = nav,
-                trailingFab = trailingFab,
-                modifier = Modifier
-                    .align(Alignment.BottomCenter)
-                    .padding(bottom = 24.dp),
-            )
+            if (isTopLevel) {
+                BottomNav(
+                    navController = nav,
+                    trailingFab = trailingFab(currentRoute, pickImage::launch) { showNoteSheet = true },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .padding(bottom = 24.dp),
+                )
+            }
         }
     }
 
@@ -189,4 +184,49 @@ fun YankNavGraph() {
             onSave = notesVm::saveManualNote,
         )
     }
+}
+
+@Composable
+private fun topTitle(currentRoute: String?): String = when (currentRoute) {
+    TopDest.Records.route   -> stringResource(R.string.tab_records)
+    TopDest.Notes.route     -> stringResource(R.string.tab_notes)
+    TopDest.Reminders.route -> stringResource(R.string.tab_reminders)
+    TopDest.Settings.route  -> stringResource(R.string.tab_settings)
+    else -> ""
+}
+
+@OptIn(ExperimentalMaterial3ExpressiveApi::class)
+@Composable
+private fun trailingFab(
+    currentRoute: String?,
+    onPickImage: (String) -> Unit,
+    onNewNote: () -> Unit,
+): (@Composable RowScope.() -> Unit)? = when (currentRoute) {
+    TopDest.Records.route -> {
+        {
+            FilledIconButton(
+                onClick = { onPickImage("image/*") },
+                modifier = Modifier.size(60.dp).padding(4.dp),
+                shape = MaterialShapes.Cookie9Sided.toShape(),
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                ),
+            ) { Icon(Icons.Outlined.PhotoCamera, contentDescription = stringResource(R.string.action_pick_image)) }
+        }
+    }
+    TopDest.Notes.route -> {
+        {
+            FilledIconButton(
+                onClick = onNewNote,
+                modifier = Modifier.size(60.dp).padding(4.dp),
+                shape = MaterialShapes.Cookie9Sided.toShape(),
+                colors = IconButtonDefaults.filledIconButtonColors(
+                    containerColor = MaterialTheme.colorScheme.tertiary,
+                    contentColor = MaterialTheme.colorScheme.onTertiary,
+                ),
+            ) { Icon(Icons.Outlined.Edit, contentDescription = stringResource(R.string.action_new_note)) }
+        }
+    }
+    else -> null
 }

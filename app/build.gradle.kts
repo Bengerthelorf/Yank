@@ -71,6 +71,7 @@ dependencies {
     implementation(libs.androidx.work.runtime.ktx)
     implementation(libs.zxing.core)
     implementation(libs.materialkolor)
+    implementation(libs.coil.compose)
     debugImplementation(libs.timber)
 
     testImplementation(libs.junit)

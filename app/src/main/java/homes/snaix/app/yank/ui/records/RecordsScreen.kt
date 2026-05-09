@@ -29,7 +29,7 @@ import homes.snaix.app.yank.ui.common.rememberRecordActionMenu
 import homes.snaix.app.yank.ui.nav.BottomNavReservedHeight
 
 @Composable
-fun RecordsScreen() {
+fun RecordsScreen(onOpenDetail: (String) -> Unit) {
     val app = LocalContext.current.applicationContext as YankApp
     val vm: RecordsViewModel = viewModel(factory = viewModelFactory {
         initializer { RecordsViewModel(app.di.historyRepo) }
@@ -68,7 +68,7 @@ fun RecordsScreen() {
                     SwipeToDeleteBox(onDelete = { vm.delete(entity.id) }) {
                         TypeCard(
                             entity = entity,
-                            onClick = { copy(entity) },
+                            onClick = { onOpenDetail(entity.id) },
                             onLongClick = { menu.openMenu(entity) },
                             modifier = Modifier.padding(horizontal = 16.dp, vertical = 6.dp),
                         )

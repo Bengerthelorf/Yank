@@ -88,10 +88,14 @@
     <string name="recognize_saved">已保存到记录</string>
 
     <!-- Card action menu (long-press) -->
-    <string name="action_copy">复制主要文本</string>
+    <string name="action_copy">复制</string>
     <string name="action_archive">归档</string>
     <string name="action_delete">删除</string>
     <string name="action_menu_title">快捷操作</string>
+
+    <!-- Detail screen -->
+    <string name="detail_title">详情</string>
+    <string name="detail_created_at">捕获于 %1$s</string>
 
     <!-- Records empty states -->
     <string name="empty_filter_title">该筛选下没有记录</string>

@@ -19,6 +19,7 @@ workManager = "2.11.2"
 zxing = "3.5.4"
 materialkolor = "3.0.1"
 timber = "5.0.1"
+coil = "2.7.0"
 junit = "4.13.2"
 truth = "1.4.5"
 turbine = "1.2.1"
@@ -61,6 +62,7 @@ androidx-work-testing = { module = "androidx.work:work-testing", version.ref = "
 zxing-core = { module = "com.google.zxing:core", version.ref = "zxing" }
 materialkolor = { module = "com.materialkolor:material-kolor", version.ref = "materialkolor" }
 timber = { module = "com.jakewharton.timber:timber", version.ref = "timber" }
+coil-compose = { module = "io.coil-kt:coil-compose", version.ref = "coil" }
 junit = { module = "junit:junit", version.ref = "junit" }
 truth = { module = "com.google.truth:truth", version.ref = "truth" }
 turbine = { module = "app.cash.turbine:turbine", version.ref = "turbine" }
