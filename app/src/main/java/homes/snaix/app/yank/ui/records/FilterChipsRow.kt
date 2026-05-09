@@ -26,7 +26,7 @@ fun FilterChipsRow(
         modifier = modifier.horizontalScroll(rememberScrollState()).padding(horizontal = 16.dp),
         horizontalArrangement = Arrangement.spacedBy(8.dp),
     ) {
-        RecordFilter.entries.forEach { f ->
+        RecordFilter.entries.filter { it != RecordFilter.All }.forEach { f ->
             val (container, onContainer) = when (f) {
                 RecordFilter.Queue   -> colors.queue.container to colors.queue.onContainer
                 RecordFilter.Pickup  -> colors.pickup.container to colors.pickup.onContainer
@@ -38,7 +38,10 @@ fun FilterChipsRow(
             }
             FilterChip(
                 selected = selected == f,
-                onClick = { onSelected(f) },
+                onClick = {
+                    if (selected == f) onSelected(RecordFilter.All)
+                    else onSelected(f)
+                },
                 label = { Text(stringResource(f.labelRes)) },
                 colors = if (container != Color.Unspecified)
                     FilterChipDefaults.filterChipColors(selectedContainerColor = container, selectedLabelColor = onContainer)

@@ -83,6 +83,10 @@
     <string name="test_error_no_key">未填 API key</string>
     <string name="test_error_bad_type">返回非闭枚举 type</string>
 
+    <!-- Recognition progress -->
+    <string name="recognize_in_flight">正在识别…</string>
+    <string name="recognize_saved">已保存到记录</string>
+
     <!-- Result bottom sheet -->
     <string name="result_recognize_failed">识别失败</string>
     <string name="result_parse_failure_message">模型返回内容无法解析为闭枚举 type。</string>

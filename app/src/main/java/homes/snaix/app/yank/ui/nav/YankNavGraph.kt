@@ -2,14 +2,25 @@ package homes.snaix.app.yank.ui.nav
 
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.slideInVertically
+import androidx.compose.animation.slideOutVertically
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.RowScope
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.width
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.outlined.Edit
 import androidx.compose.material.icons.outlined.PhotoCamera
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ExperimentalMaterial3ExpressiveApi
 import androidx.compose.material3.FilledIconButton
@@ -18,11 +29,16 @@ import androidx.compose.material3.IconButtonDefaults
 import androidx.compose.material3.MaterialShapes
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.Snackbar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.toShape
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -41,6 +57,7 @@ import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.compose.rememberNavController
 import homes.snaix.app.yank.R
 import homes.snaix.app.yank.YankApp
+import homes.snaix.app.yank.domain.capture.PipelineOutcome
 import homes.snaix.app.yank.ui.notes.ManualNoteSheet
 import homes.snaix.app.yank.ui.notes.NotesScreen
 import homes.snaix.app.yank.ui.notes.NotesViewModel
@@ -59,11 +76,28 @@ fun YankNavGraph() {
     val ctx = LocalContext.current.applicationContext as YankApp
     val scope = rememberCoroutineScope()
 
+    var processingCount by remember { mutableIntStateOf(0) }
+    val snackbarHostState = remember { SnackbarHostState() }
+    val savedMsg = stringResource(R.string.recognize_saved)
+
+    LaunchedEffect(Unit) {
+        ctx.di.captureOutcomes.collect { outcome ->
+            if (outcome is PipelineOutcome.Success) {
+                snackbarHostState.showSnackbar(savedMsg)
+            }
+        }
+    }
+
     val pickImage = rememberLauncherForActivityResult(ActivityResultContracts.GetContent()) { uri ->
         if (uri != null) {
             scope.launch {
-                val outcome = ctx.di.imagePickPipeline.process(uri)
-                ctx.di.captureOutcomeBus.emit(outcome)
+                processingCount++
+                try {
+                    val outcome = ctx.di.imagePickPipeline.process(uri)
+                    ctx.di.captureOutcomeBus.emit(outcome)
+                } finally {
+                    processingCount--
+                }
             }
         }
     }
@@ -117,6 +151,12 @@ fun YankNavGraph() {
 
     Scaffold(
         topBar = { TopAppBar(title = { Text(title) }) },
+        snackbarHost = {
+            SnackbarHost(
+                hostState = snackbarHostState,
+                modifier = Modifier.padding(bottom = 96.dp),
+            ) { Snackbar(it) }
+        },
         containerColor = MaterialTheme.colorScheme.surface,
     ) { padding ->
         Box(modifier = Modifier.fillMaxSize().padding(padding)) {
@@ -129,6 +169,14 @@ fun YankNavGraph() {
                 composable(TopDest.Notes.route)     { NotesScreen() }
                 composable(TopDest.Reminders.route) { RemindersScreen() }
                 composable(TopDest.Settings.route)  { SettingsScreen() }
+            }
+            AnimatedVisibility(
+                visible = processingCount > 0,
+                enter = slideInVertically { -it } + fadeIn(),
+                exit = slideOutVertically { -it } + fadeOut(),
+                modifier = Modifier.align(Alignment.TopCenter).padding(top = 12.dp),
+            ) {
+                ProcessingCard()
             }
             BottomNav(
                 navController = nav,
@@ -145,5 +193,28 @@ fun YankNavGraph() {
             onDismiss = { showNoteSheet = false },
             onSave = notesVm::saveManualNote,
         )
+    }
+}
+
+@Composable
+private fun ProcessingCard() {
+    ElevatedCard(modifier = Modifier.padding(horizontal = 24.dp)) {
+        Row(
+            modifier = Modifier.padding(horizontal = 20.dp, vertical = 14.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.Start,
+        ) {
+            CircularProgressIndicator(
+                modifier = Modifier.size(20.dp),
+                strokeWidth = 2.5.dp,
+                color = MaterialTheme.colorScheme.primary,
+            )
+            Spacer(Modifier.width(14.dp))
+            Text(
+                text = stringResource(R.string.recognize_in_flight),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurface,
+            )
+        }
     }
 }

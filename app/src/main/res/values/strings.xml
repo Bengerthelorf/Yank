@@ -83,6 +83,10 @@
     <string name="test_error_no_key">No API key configured</string>
     <string name="test_error_bad_type">Returned type outside the allowed set</string>
 
+    <!-- Recognition progress -->
+    <string name="recognize_in_flight">Recognizing…</string>
+    <string name="recognize_saved">Saved to records</string>
+
     <!-- Result bottom sheet -->
     <string name="result_recognize_failed">Recognition failed</string>
     <string name="result_parse_failure_message">Model response could not be parsed into the allowed type set.</string>
