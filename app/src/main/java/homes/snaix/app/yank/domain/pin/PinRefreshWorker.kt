@@ -9,7 +9,7 @@ import androidx.work.WorkManager
 import androidx.work.WorkerParameters
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.domain.schema.Recognition
-import kotlinx.serialization.json.Json
+import homes.snaix.app.yank.domain.schema.RecognitionJson
 import java.util.concurrent.TimeUnit
 
 class PinRefreshWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
@@ -22,7 +22,7 @@ class PinRefreshWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker
         val entity = app.di.historyRepo.get(historyId) ?: return Result.success()
         if (entity.archived) return Result.success()
 
-        val r = Json { ignoreUnknownKeys = true }.decodeFromString<Recognition>(entity.rawJson)
+        val r = RecognitionJson.decodeFromString<Recognition>(entity.rawJson)
         app.di.pinPublisher.publish(entity, notificationId, r, payload = null)
 
         // Reschedule next refresh

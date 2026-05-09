@@ -5,7 +5,7 @@ import androidx.work.CoroutineWorker
 import androidx.work.WorkerParameters
 import homes.snaix.app.yank.YankApp
 import homes.snaix.app.yank.domain.schema.Recognition
-import kotlinx.serialization.json.Json
+import homes.snaix.app.yank.domain.schema.RecognitionJson
 
 class TodoPinWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ctx, params) {
     override suspend fun doWork(): Result {
@@ -17,7 +17,7 @@ class TodoPinWorker(ctx: Context, params: WorkerParameters) : CoroutineWorker(ct
         val entity = app.di.historyRepo.get(historyId) ?: return Result.failure()
         if (entity.archived) return Result.success()
 
-        val r = Json { ignoreUnknownKeys = true }.decodeFromString<Recognition>(entity.rawJson)
+        val r = RecognitionJson.decodeFromString<Recognition>(entity.rawJson)
         app.di.pinPublisher.publish(entity, notificationId, r, payload = null)
         return Result.success()
     }

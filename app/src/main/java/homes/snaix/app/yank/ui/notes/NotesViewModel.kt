@@ -13,8 +13,8 @@ import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
+import homes.snaix.app.yank.domain.schema.RecognitionJson
 import kotlinx.serialization.encodeToString
-import kotlinx.serialization.json.Json
 import java.util.UUID
 
 class NotesViewModel(
@@ -51,7 +51,7 @@ class NotesViewModel(
                     body.lineSequence().firstOrNull()?.trim()?.take(80)
                 else listOfNotNull(date, time).joinToString(" ").ifEmpty { null },
                 rawText = listOfNotNull(title, body).joinToString(" "),
-                rawJson = Json.encodeToString(recognition),
+                rawJson = RecognitionJson.encodeToString(recognition),
                 zxingPayloads = null,
                 screenshotPath = null,
                 createdAt = now,
