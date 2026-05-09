@@ -20,22 +20,10 @@ class ImagePickPipeline(
         return capture.process(downscaled, source = Source.IMAGE_PICK)
     }
 
-    /**
-     * Decode strategy:
-     *
-     *   1. Try [ImageDecoder] directly against the content URI. Fastest path
-     *      and handles HEIC/AVIF/animated-WebP/EXIF rotation natively
-     *      (we're on minSdk 29).
-     *   2. If that fails, copy the URI's bytes to a local cache file first
-     *      and try [ImageDecoder] against the file. This recovers from:
-     *        - Google Photos / Drive cloud URIs that intermittently return
-     *          partial streams or fail seekable-source assertions.
-     *        - Some HEIC variants that need a fully-buffered source.
-     *
-     * Both paths force [ImageDecoder.ALLOCATOR_SOFTWARE] because the bitmap
-     * is later passed to [Bitmap.compress] (PNG) and [Bitmap.createScaledBitmap]
-     * — both throw on hardware-backed bitmaps.
-     */
+    // Direct ImageDecoder fails on some Google Photos cloud URIs that return
+    // partial streams. Cache-file path buffers the bytes first as a recovery.
+    // ALLOCATOR_SOFTWARE is mandatory: hardware bitmaps fail compress(PNG)
+    // and createScaledBitmap downstream.
     private fun decodeBitmap(uri: Uri): Bitmap? {
         runCatching { decodeViaImageDecoder(uri) }
             .onSuccess { return it }

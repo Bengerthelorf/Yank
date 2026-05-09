@@ -3,19 +3,9 @@ package homes.snaix.app.yank.ui.records
 import androidx.annotation.StringRes
 import homes.snaix.app.yank.R
 
-/**
- * Single source of truth for the six *recordable* type discriminators that
- * the model is allowed to emit. The seventh schema discriminator, `notes`,
- * is intentionally excluded — Notes live on a dedicated screen and never
- * participate in chip filtering or color theming. Each enum value carries:
- *   - `discriminator`: the literal Chinese string that appears in the JSON
- *     contract (model output) and is stored in [HistoryEntity.type]. Do NOT
- *     localize — this is a domain value, not a UI string.
- *   - `labelRes`: the localized chip / card label.
- *
- * Color roles are looked up via [TypeColors.roleFor] so the per-type palette
- * lives in `ui/theme/TypeColors.kt` and never gets duplicated in callers.
- */
+// Six recordable types. The seventh schema discriminator `notes` is
+// intentionally excluded — Notes live on a separate screen and never
+// participate in chip filtering or color theming.
 enum class RecordType(
     val discriminator: String,
     @StringRes val labelRes: Int,

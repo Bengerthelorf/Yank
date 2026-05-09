@@ -29,7 +29,6 @@ data class TypeColors(
     val todo: TypeColorRole,
     val notes: TypeColorRole,
 ) {
-    /** Resolve a [TypeColorRole] for a known [RecordType]. */
     fun roleFor(type: RecordType): TypeColorRole = when (type) {
         RecordType.Queue   -> queue
         RecordType.Pickup  -> pickup

@@ -57,13 +57,7 @@ class AppContainer(private val ctx: Context) {
 
     val imagePickPipeline by lazy { ImagePickPipeline(ctx, capturePipeline) }
 
-    // replay = 0: outcomes are one-shot UI events. With replay = 1 a fresh
-    // subscriber re-receives the last outcome after a configuration change
-    // (rotation, locale switch), which would re-pop a failure sheet the user
-    // already dismissed — worse UX than the rare missed snackbar. The proper
-    // fix for "configuration change mid-recognition drops the result" is to
-    // launch the recognition coroutine in an application-scoped scope rather
-    // than the composable's; tracked for a follow-up.
+    // replay = 0: re-emitting after rotation would re-pop dismissed failure sheets.
     private val _outcomes = MutableSharedFlow<homes.snaix.app.yank.domain.capture.PipelineOutcome>(
         replay = 0, extraBufferCapacity = 8, onBufferOverflow = BufferOverflow.DROP_OLDEST
     )

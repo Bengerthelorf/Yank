@@ -41,9 +41,6 @@ fun TypeCard(
         shape = RoundedCornerShape(20.dp),
         colors = CardDefaults.cardColors(containerColor = role.container),
     ) {
-        // combinedClickable lives INSIDE the Card so the hit region matches the
-        // visual card bounds; otherwise the outer padding the caller passes
-        // (e.g., 16dp horizontal between cards) becomes tappable too.
         Column(
             modifier = Modifier
                 .fillMaxWidth()

@@ -40,8 +40,8 @@ fun RecordsScreen() {
     val copy = rememberCopyEntity()
     val menu = rememberRecordActionMenu(
         onCopy = copy,
-        onArchive = { vm.archive(it.id) },
         onDelete = { vm.delete(it.id) },
+        onArchive = { vm.archive(it.id) },
     )
 
     if (!hasAnyData) {

@@ -20,10 +20,11 @@ import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Text
 import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
@@ -34,9 +35,6 @@ import homes.snaix.app.yank.R
 import homes.snaix.app.yank.data.db.HistoryEntity
 import kotlinx.coroutines.launch
 
-/**
- * One row in the long-press action menu. Local to the sheet's API.
- */
 data class ActionMenuItem(
     val icon: ImageVector,
     val labelRes: Int,
@@ -44,20 +42,6 @@ data class ActionMenuItem(
     val onClick: () -> Unit,
 )
 
-/**
- * Bottom-sheet quick-action menu shown on long-press of a record / note card.
- * Stateless from the caller's perspective: the caller passes the title and
- * items, and provides a single [onDismiss] that clears whatever trigger
- * state opened the sheet.
- *
- * Each row's tap fires its action *first* (immediate feedback) and then
- * suspends to animate the sheet out before reporting dismissal — without
- * the suspending hide(), nulling the trigger would cause the sheet to
- * disappear without the slide-down animation.
- *
- * The destructive action is rendered last with the error tint, matching M3
- * convention.
- */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ActionMenuSheet(
@@ -68,6 +52,8 @@ fun ActionMenuSheet(
     val sheetState = rememberModalBottomSheetState(skipPartiallyExpanded = true)
     val scope = rememberCoroutineScope()
 
+    // Fire action first for immediate feedback, then suspend on hide() so
+    // the sheet animates out instead of vanishing when onDismiss nulls the trigger.
     fun closeAfter(action: () -> Unit) {
         action()
         scope.launch {
@@ -117,25 +103,6 @@ private fun ActionRow(item: ActionMenuItem, onTap: () -> Unit) {
     }
 }
 
-/**
- * Single-call host that owns the menu's open/close state and dispatches the
- * three or four standard actions. Pulls the per-screen long-press boilerplate
- * (12 lines × 3 screens of menuTarget / let / ActionMenuSheet) into one place.
- *
- * Pass `onArchive = null` for screens that don't expose an archive action
- * (Notes, currently). The returned `openMenu` is the lambda the caller wires
- * into [TypeCard]'s `onLongClick`.
- */
-/**
- * Stable handle for the long-press quick-action menu. Pulls the
- * `var menuTarget by remember { … }` + `menuTarget?.let { ActionMenuSheet(…) }`
- * boilerplate that was previously triplicated across Records / Notes /
- * Reminders into a single call.
- *
- * Caller wires `openMenu(entity)` into [TypeCard]'s `onLongClick` and places
- * `Host()` somewhere stable (e.g., end of the screen), and the rest is
- * internal.
- */
 class RecordActionMenu internal constructor(
     val openMenu: (HistoryEntity) -> Unit,
     val Host: @Composable () -> Unit,
@@ -147,66 +114,42 @@ fun rememberRecordActionMenu(
     onDelete: (HistoryEntity) -> Unit,
     onArchive: ((HistoryEntity) -> Unit)? = null,
 ): RecordActionMenu {
-    val target: MutableState<HistoryEntity?> = remember { mutableStateOf(null) }
+    var target by remember { mutableStateOf<HistoryEntity?>(null) }
     return RecordActionMenu(
-        openMenu = { target.value = it },
-        Host = { ActionMenuHost(target, onCopy, onArchive, onDelete) },
+        openMenu = { target = it },
+        Host = {
+            val entity = target
+            if (entity != null) {
+                ActionMenuSheet(
+                    title = entity.displayPrimary,
+                    items = actionItemsFor(
+                        onCopy = { onCopy(entity) },
+                        onDelete = { onDelete(entity) },
+                        onArchive = onArchive?.let { fn -> { fn(entity) } },
+                    ),
+                    onDismiss = { target = null },
+                )
+            }
+        },
     )
 }
 
 @Composable
-private fun ActionMenuHost(
-    target: MutableState<HistoryEntity?>,
-    onCopy: (HistoryEntity) -> Unit,
-    onArchive: ((HistoryEntity) -> Unit)?,
-    onDelete: (HistoryEntity) -> Unit,
-) {
-    val entity = target.value ?: return
-    val items = if (onArchive != null) {
-        actionItemsFor(
-            onCopy = { onCopy(entity) },
-            onArchive = { onArchive(entity) },
-            onDelete = { onDelete(entity) },
-        )
-    } else {
-        actionItemsFor(
-            onCopy = { onCopy(entity) },
-            onDelete = { onDelete(entity) },
-        )
+private fun actionItemsFor(
+    onCopy: () -> Unit,
+    onDelete: () -> Unit,
+    onArchive: (() -> Unit)?,
+): List<ActionMenuItem> = buildList {
+    add(ActionMenuItem(Icons.Outlined.ContentCopy, R.string.action_copy, onClick = onCopy))
+    if (onArchive != null) {
+        add(ActionMenuItem(Icons.Outlined.Archive, R.string.action_archive, onClick = onArchive))
     }
-    ActionMenuSheet(
-        title = entity.displayPrimary,
-        items = items,
-        onDismiss = { target.value = null },
+    add(
+        ActionMenuItem(
+            icon = Icons.Outlined.DeleteOutline,
+            labelRes = R.string.action_delete,
+            tint = MaterialTheme.colorScheme.error,
+            onClick = onDelete,
+        ),
     )
 }
-
-@Composable
-private fun actionItemsFor(
-    onCopy: () -> Unit,
-    onArchive: () -> Unit,
-    onDelete: () -> Unit,
-): List<ActionMenuItem> = listOf(
-    ActionMenuItem(Icons.Outlined.ContentCopy, R.string.action_copy, onClick = onCopy),
-    ActionMenuItem(Icons.Outlined.Archive, R.string.action_archive, onClick = onArchive),
-    ActionMenuItem(
-        icon = Icons.Outlined.DeleteOutline,
-        labelRes = R.string.action_delete,
-        tint = MaterialTheme.colorScheme.error,
-        onClick = onDelete,
-    ),
-)
-
-@Composable
-private fun actionItemsFor(
-    onCopy: () -> Unit,
-    onDelete: () -> Unit,
-): List<ActionMenuItem> = listOf(
-    ActionMenuItem(Icons.Outlined.ContentCopy, R.string.action_copy, onClick = onCopy),
-    ActionMenuItem(
-        icon = Icons.Outlined.DeleteOutline,
-        labelRes = R.string.action_delete,
-        tint = MaterialTheme.colorScheme.error,
-        onClick = onDelete,
-    ),
-)

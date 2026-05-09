@@ -74,7 +74,7 @@ enum class VlmProvider(
     );
 
     companion object {
-        /** Match baseUrl back to a provider. Returns null if URL is custom (advanced override). */
+        // null means the user typed a custom baseUrl that doesn't match any preset.
         fun fromBaseUrl(url: String): VlmProvider? =
             entries.firstOrNull { url.trim().trimEnd('/') == it.baseUrl.trimEnd('/') }
     }

@@ -16,14 +16,6 @@ import kotlinx.coroutines.flow.flatMapLatest
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 
-/**
- * Sealed model of the visible record filter on the Records screen.
- *
- * - [All]: no filter, all active (non-archived) records show.
- * - [ByType]: a single type filter; the [RecordType] supplies discriminator
- *   and label without RecordFilter ever knowing the discriminator string.
- * - [Archived]: orthogonal "trash bin" view.
- */
 sealed interface RecordFilter {
     @get:StringRes val labelRes: Int
 
@@ -62,13 +54,8 @@ class RecordsViewModel(
             }
             .stateIn(viewModelScope, SharingStarted.Eagerly, emptyList())
 
-    /**
-     * Whether the database has any non-notes record at all, archived or not.
-     * The screen uses this to distinguish the genuine "nothing recorded yet"
-     * empty state from "the current filter matched nothing". Includes
-     * archived rows so a fully-archived DB still keeps the chip row (and
-     * therefore the Archived chip) reachable.
-     */
+    // Includes archived rows so a fully-archived DB still keeps the chip row
+    // (and the Archived chip) reachable.
     val hasAnyData: StateFlow<Boolean> =
         repo.observeAnyRecord()
             .stateIn(viewModelScope, SharingStarted.Eagerly, false)

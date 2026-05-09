@@ -88,9 +88,7 @@ sealed class Recognition {
     @Serializable @SerialName("notes")
     data class Note(
         val title: String? = null,
-        // The free-form summary body. Wire name was historically `number`
-        // (semantically wrong); accept both via @JsonNames so model output and
-        // old cached rawJson both still parse, but always serialize as `body`.
+        // Wire name was historically `number`; @JsonNames keeps old rawJson parsing.
         @SerialName("body")
         @kotlinx.serialization.json.JsonNames("body", "number")
         val body: String? = null,
@@ -99,11 +97,8 @@ sealed class Recognition {
     ) : Recognition()
 }
 
-/**
- * The discriminator string for this Recognition. Computed from the class
- * (not stored as a property) so it doesn't conflict with kotlinx.serialization's
- * @JsonClassDiscriminator("type") when encoding.
- */
+// Computed extension, not a property — a stored property would collide with
+// the @JsonClassDiscriminator("type") field when encoding.
 val Recognition.type: String
     get() = when (this) {
         is Recognition.Queue   -> "排队"

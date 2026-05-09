@@ -17,12 +17,6 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import homes.snaix.app.yank.R
 
-/**
- * Pill-shaped progress indicator that floats at the top of the screen while
- * a long-running recognition is in flight. Stateless: callers wrap it in
- * [androidx.compose.animation.AnimatedVisibility] tied to their own
- * processing state.
- */
 @Composable
 fun ProcessingCard(modifier: Modifier = Modifier) {
     ElevatedCard(modifier = modifier.padding(horizontal = 24.dp)) {

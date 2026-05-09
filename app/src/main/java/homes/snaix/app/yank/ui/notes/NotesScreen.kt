@@ -45,7 +45,6 @@ fun NotesScreen() {
     val menu = rememberRecordActionMenu(
         onCopy = copy,
         onDelete = { vm.delete(it.id) },
-        // notes never archive — they live on a separate screen with no archive view
     )
 
     if (items.isEmpty()) {
@@ -80,8 +79,6 @@ private fun NoteCard(
     onLongClick: () -> Unit,
     modifier: Modifier = Modifier,
 ) {
-    // combinedClickable lives INSIDE the Card so the hit region matches the
-    // visual card bounds, not the outer padding the caller adds for layout.
     Card(
         shape = RoundedCornerShape(20.dp),
         modifier = modifier.fillMaxWidth(),
