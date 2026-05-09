@@ -20,4 +20,7 @@ interface DedupDao {
         LIMIT 1
     """)
     suspend fun findFreshActive(key: String, since: Long): DedupEntity?
+
+    @Query("SELECT * FROM dedup WHERE historyId = :historyId LIMIT 1")
+    suspend fun findByHistoryId(historyId: String): DedupEntity?
 }

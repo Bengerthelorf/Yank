@@ -115,11 +115,23 @@ class Router(
         val payload = entity.zxingPayloads?.split(',')?.firstOrNull()
         val tNow = now()
         val archiveAtMs = computeArchiveAt(r, tNow, computeEventTime(r))
-        val nid = nextNotificationId()
-        if (entity.archived || entity.archiveAt != archiveAtMs) {
-            repo.upsert(entity.copy(archived = false, archiveAt = archiveAtMs))
+
+        // Reuse the entity's existing notification id so the platform updates
+        // the visible notification in place rather than posting a duplicate,
+        // and so the dedup table stays consistent with what's on screen.
+        val existing = repo.findDedupByHistoryId(entity.id)
+        val nid = existing?.notificationId ?: nextNotificationId()
+        if (existing == null) {
+            repo.insertDedup(DedupEntity(dedupKey(r), nid, entity.id, tNow))
         }
-        publisher.publish(entity, nid, r, payload)
+
+        // Kill any queued TodoPinWorker so it doesn't fire later and post a
+        // second notification on the same id.
+        if (r is Recognition.Todo) scheduler.cancelTodo(entity.id)
+
+        val updated = entity.copy(archived = false, archiveAt = archiveAtMs)
+        if (updated != entity) repo.upsert(updated)
+        publisher.publish(updated, nid, r, payload)
         scheduler.scheduleArchive(entity.id, archiveAtMs, nid)
     }
 

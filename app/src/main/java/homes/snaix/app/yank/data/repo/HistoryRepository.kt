@@ -25,6 +25,8 @@ class HistoryRepository(
 
     suspend fun findFreshDedup(key: String, since: Long): DedupEntity? =
         dedupDao.findFreshActive(key, since)
+    suspend fun findDedupByHistoryId(historyId: String): DedupEntity? =
+        dedupDao.findByHistoryId(historyId)
     suspend fun insertDedup(entry: DedupEntity) = dedupDao.insert(entry)
     suspend fun touchDedup(key: String, now: Long) = dedupDao.touch(key, now)
 }
